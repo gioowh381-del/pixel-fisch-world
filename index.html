@@ -1,0 +1,2996 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PIXEL FISCH WORLD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark: #0b132b;
+    --panel-bg: rgba(15, 25, 48, 0.92);
+    --panel-border: #3a6ea5;
+    --accent-gold: #ffd166;
+    --accent-cyan: #4cc9f0;
+    --accent-green: #06d6a0;
+    --accent-red: #ef476f;
+    --text-main: #f8f9fa;
+    --text-muted: #94a3b8;
+  }
+
+  * {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #070d19;
+    color: var(--text-main);
+    font-family: 'Chakra Petch', sans-serif;
+  }
+
+  .pixel-font {
+    font-family: 'Press Start 2P', monospace;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  /* Custom Scrollbar for Modals */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb { background: #3a6ea5; border-radius: 4px; }
+
+  /* Buttons */
+  .btn {
+    background: linear-gradient(180deg, #2b5876 0%, #1e3c72 100%);
+    border: 2px solid #60a5fa;
+    border-radius: 8px;
+    color: #fff;
+    padding: 8px 14px;
+    font-family: 'Chakra Petch', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #0f172a;
+    transition: transform 0.08s, filter 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn:hover { filter: brightness(1.15); }
+  .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #0f172a; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.7); }
+
+  .btn-gold {
+    background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%);
+    border-color: #fde68a;
+    color: #fff;
+  }
+  .btn-green {
+    background: linear-gradient(180deg, #10b981 0%, #047857 100%);
+    border-color: #6ee7b7;
+  }
+  .btn-red {
+    background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+    border-color: #fca5a5;
+  }
+  .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
+
+  /* Main Menu Overlay */
+  #main-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 50% 35%, rgba(16, 42, 76, 0.72), rgba(6, 12, 26, 0.92));
+    backdrop-filter: blur(2px);
+    padding: 16px;
+  }
+
+  .game-logo {
+    text-align: center;
+    margin-bottom: 24px;
+    animation: floatLogo 3s ease-in-out infinite;
+  }
+  .game-logo h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(22px, 5vw, 46px);
+    color: #ffd166;
+    text-shadow: 0 4px 0 #9a3412, 0 0 24px rgba(76, 201, 240, 0.7);
+    line-height: 1.35;
+    letter-spacing: 2px;
+  }
+  .game-logo p {
+    margin-top: 10px;
+    font-size: clamp(13px, 2vw, 17px);
+    color: #bae6fd;
+    letter-spacing: 1px;
+  }
+
+  @keyframes floatLogo {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .menu-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: min(320px, 90vw);
+    background: rgba(13, 24, 46, 0.85);
+    border: 2px solid #4cc9f0;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65);
+  }
+  .menu-btn {
+    width: 100%;
+    padding: 13px;
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+  .menu-top-bar {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Intro Splash Screen ("พัฒนาโดย:ภีม") */
+  #intro-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: radial-gradient(circle at center, #0f1f3d 0%, #030712 100%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.85s ease-in-out;
+    pointer-events: all;
+  }
+  #intro-splash.active {
+    display: flex;
+  }
+  #intro-splash.visible {
+    opacity: 1;
+  }
+  .credit-hero-text {
+    font-family: 'Chakra Petch', sans-serif;
+    font-weight: 700;
+    font-size: clamp(34px, 7vw, 72px);
+    color: #ffffff;
+    text-align: center;
+    letter-spacing: 3px;
+    text-shadow:
+      0 0 12px #4cc9f0,
+      0 0 28px #3b82f6,
+      0 0 55px #ffd166,
+      0 4px 0 #1e3a8a;
+    animation: creditPulse 2.8s ease-in-out infinite;
+    padding: 0 20px;
+  }
+  .credit-sub-line {
+    margin-top: 14px;
+    width: 180px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #ffd166, #4cc9f0, transparent);
+    border-radius: 99px;
+    box-shadow: 0 0 15px #4cc9f0;
+  }
+  @keyframes creditPulse {
+    0% { transform: scale(0.94) translateY(6px); filter: brightness(0.9); }
+    50% { transform: scale(1.03) translateY(-4px); filter: brightness(1.25); }
+    100% { transform: scale(0.98) translateY(0px); filter: brightness(1); }
+  }
+
+  /* Compact Non-Intrusive HUD */
+  #hud {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 20;
+    display: none;
+  }
+  .hud-interactive {
+    pointer-events: auto;
+  }
+
+  #hud-top-left {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(11, 19, 38, 0.82);
+    border: 1.5px solid rgba(96, 165, 250, 0.55);
+    border-radius: 10px;
+    padding: 7px 11px;
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 245px;
+  }
+  .hud-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .exp-bar-wrap {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .exp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #38bdf8, #34d399);
+    width: 0%;
+    transition: width 0.3s;
+  }
+
+  #hud-top-right {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 5px;
+    max-width: 55vw;
+  }
+  .hud-icon-btn {
+    background: rgba(11, 19, 38, 0.84);
+    border: 1.5px solid rgba(96, 165, 250, 0.55);
+    color: #f8fafc;
+    border-radius: 8px;
+    padding: 6px 9px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: 0.15s;
+  }
+  .hud-icon-btn:hover {
+    background: rgba(30, 58, 138, 0.9);
+    border-color: #ffd166;
+  }
+
+  /* Event & Toast Banner */
+  #event-banner {
+    position: absolute;
+    top: 52px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, rgba(180,83,9,0.9), rgba(217,119,6,0.9));
+    border: 1px solid #fde68a;
+    border-radius: 99px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    display: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+
+  #toast-container {
+    position: fixed;
+    bottom: 92px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    pointer-events: none;
+  }
+  .toast {
+    background: rgba(15, 23, 42, 0.94);
+    border: 1.5px solid #4cc9f0;
+    color: #fff;
+    padding: 7px 14px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    animation: toastIn 0.25s ease-out;
+    text-align: center;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Context Prompt above bottom */
+  #interact-prompt {
+    position: absolute;
+    bottom: 84px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.88);
+    border: 1.5px solid #ffd166;
+    color: #ffd166;
+    padding: 5px 14px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 700;
+    display: none;
+    white-space: nowrap;
+  }
+
+  /* Fishing Minigame Overlay (Fisch-style horizontal bar) */
+  #fishing-minigame {
+    position: fixed;
+    bottom: 115px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(360px, 88vw);
+    background: rgba(10, 18, 36, 0.92);
+    border: 2px solid #ffd166;
+    border-radius: 12px;
+    padding: 10px 12px;
+    z-index: 35;
+    display: none;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.75);
+  }
+  .mg-track {
+    position: relative;
+    width: 100%;
+    height: 26px;
+    background: #0f172a;
+    border: 2px solid #334155;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 6px 0;
+  }
+  .mg-catch-zone {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(52, 211, 153, 0.75), rgba(16, 185, 129, 0.55));
+    border-left: 2px solid #a7f3d0;
+    border-right: 2px solid #a7f3d0;
+    border-radius: 4px;
+  }
+  .mg-fish-marker {
+    position: absolute;
+    top: 2px;
+    width: 20px;
+    height: 18px;
+    transform: translateX(-50%);
+    font-size: 15px;
+    line-height: 18px;
+    text-align: center;
+    filter: drop-shadow(0 0 4px #ffd166);
+  }
+  .mg-progress-wrap {
+    width: 100%;
+    height: 9px;
+    background: #1e293b;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .mg-progress-fill {
+    height: 100%;
+    width: 30%;
+    background: linear-gradient(90deg, #f59e0b, #10b981);
+    transition: width 0.05s linear;
+  }
+
+  /* Bottom Action Controls (PC + Touch Friendly) */
+  #bottom-controls {
+    position: absolute;
+    bottom: 14px;
+    left: 14px;
+    right: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none;
+  }
+
+  /* Virtual Joystick */
+  #joystick-zone {
+    width: 112px;
+    height: 112px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    border-radius: 50%;
+    position: relative;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #joystick-knob {
+    width: 44px;
+    height: 44px;
+    background: rgba(76, 201, 240, 0.65);
+    border: 2px solid #bae6fd;
+    border-radius: 50%;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  #action-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    pointer-events: auto;
+  }
+  .action-circle {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.85);
+    border: 2px solid #60a5fa;
+    color: #fff;
+    font-weight: 700;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    cursor: pointer;
+  }
+  .action-circle:active { transform: scale(0.93); }
+  .action-cast {
+    width: 68px;
+    height: 68px;
+    background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+    border: 2.5px solid #ffd166;
+    font-size: 13px;
+  }
+
+  /* Modals */
+  #modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 9, 20, 0.78);
+    backdrop-filter: blur(3px);
+    z-index: 80;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+  }
+  .modal-card {
+    background: var(--panel-bg);
+    border: 2px solid var(--panel-border);
+    border-radius: 14px;
+    width: min(760px, 96vw);
+    max-height: 86vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.8);
+  }
+  .modal-header {
+    padding: 12px 16px;
+    background: rgba(10, 18, 36, 0.9);
+    border-bottom: 1px solid rgba(96, 165, 250, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-header h2 {
+    font-size: 17px;
+    color: var(--accent-gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .modal-body {
+    padding: 14px 16px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .grid-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  .item-card {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1.5px solid #334155;
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 5px;
+    transition: 0.15s;
+  }
+  .item-card:hover { border-color: #60a5fa; }
+
+  .rarity-Common { color: #cbd5e1; border-color: #64748b; }
+  .rarity-Uncommon { color: #4ade80; border-color: #22c55e; }
+  .rarity-Rare { color: #38bdf8; border-color: #0284c7; }
+  .rarity-Epic { color: #c084fc; border-color: #9333ea; }
+  .rarity-Legendary { color: #fbbf24; border-color: #d97706; }
+  .rarity-Mythical { color: #f43f5e; border-color: #e11d48; }
+  .rarity-Secret { color: #2dd4bf; border-color: #14b8a6; text-shadow: 0 0 8px rgba(45,212,191,0.6); }
+
+  .tab-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid #475569;
+    color: #cbd5e1;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .tab-btn.active {
+    background: #1d4ed8;
+    border-color: #93c5fd;
+    color: #fff;
+  }
+
+  /* Catch Reveal Popup */
+  #catch-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(10, 17, 34, 0.96);
+    border: 2.5px solid #ffd166;
+    border-radius: 16px;
+    padding: 18px 24px;
+    z-index: 75;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    box-shadow: 0 0 40px rgba(255, 209, 102, 0.35);
+    min-width: 240px;
+  }
+
+  input[type="text"], select {
+    background: #0f172a;
+    border: 1.5px solid #475569;
+    color: #fff;
+    padding: 7px 10px;
+    border-radius: 8px;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 13px;
+  }
+
+  /* Hide virtual joystick on large desktop unless toggled */
+  @media (min-width: 900px) and (pointer: fine) {
+    #joystick-zone.auto-hide {
+      opacity: 0.28;
+    }
+    #joystick-zone.auto-hide:hover {
+      opacity: 0.9;
+    }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<!-- 1. MAIN MENU -->
+<div id="main-menu">
+  <div class="menu-top-bar">
+    <button class="btn btn-sm" id="btn-lang-menu" onclick="toggleLanguage()">🌐 TH / EN</button>
+    <button class="btn btn-sm" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+  </div>
+  <div class="game-logo">
+    <h1>PIXEL FISCH<br>WORLD</h1>
+    <p id="menu-subtitle">OPEN WORLD 2D PIXEL FISHING RPG</p>
+  </div>
+  <div class="menu-box">
+    <button class="btn btn-gold menu-btn" id="btn-play" onclick="startGameFlow()">▶ PLAY</button>
+    <button class="btn menu-btn" id="btn-menu-collection" onclick="openModal('bestiary')">📖 COLLECTION</button>
+    <button class="btn menu-btn" id="btn-menu-settings" onclick="openModal('settings')">⚙️ SETTINGS</button>
+    <button class="btn menu-btn" id="btn-menu-credits" onclick="openModal('credits')">⭐ CREDITS</button>
+  </div>
+</div>
+
+<!-- 2. MANDATORY INTRO SPLASH SCREEN ("พัฒนาโดย:ภีม") -->
+<div id="intro-splash">
+  <div class="credit-hero-text">พัฒนาโดย:ภีม</div>
+  <div class="credit-sub-line"></div>
+</div>
+
+<!-- 3. IN-GAME COMPACT HUD -->
+<div id="hud">
+  <div id="hud-top-left" class="hud-interactive">
+    <div class="hud-row" style="justify-content: space-between;">
+      <span id="hud-level" style="color:#ffd166;">Lv.1</span>
+      <span id="hud-coins" style="color:#4ade80;">💰 100</span>
+      <span id="hud-biome" style="color:#38bdf8;">🏝️ Starter</span>
+    </div>
+    <div class="exp-bar-wrap">
+      <div class="exp-bar-fill" id="hud-exp-bar"></div>
+    </div>
+    <div class="hud-row" style="font-size:11px; color:#cbd5e1; justify-content:space-between;">
+      <span id="hud-rod">🎣 Wooden Rod</span>
+      <span id="hud-weather">☀️ 08:00</span>
+    </div>
+  </div>
+
+  <div id="hud-top-right" class="hud-interactive">
+    <button class="hud-icon-btn" onclick="openModal('bag')" title="Bag (B)">🎒 <span data-t="bag">กระเป๋า</span></button>
+    <button class="hud-icon-btn" onclick="openModal('bestiary')" title="Bestiary">📖 <span data-t="book">สมุดปลา</span></button>
+    <button class="hud-icon-btn" onclick="openModal('shop')" title="Shops">🏪 <span data-t="shop">ร้านค้า</span></button>
+    <button class="hud-icon-btn" onclick="openModal('quests')" title="Quests">📜 <span data-t="quest">ภารกิจ</span></button>
+    <button class="hud-icon-btn" onclick="openModal('map')" title="World Map (M)">🗺️ <span data-t="map">แผนที่</span></button>
+    <button class="hud-icon-btn" onclick="openModal('multiplayer')" title="Multiplayer">🌐 <span data-t="mp">เล่นกับเพื่อน</span></button>
+    <button class="hud-icon-btn" onclick="openModal('customize')" title="Outfit">👕</button>
+    <button class="hud-icon-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+    <button class="hud-icon-btn" onclick="openModal('settings')" title="Settings">⚙️</button>
+    <button class="hud-icon-btn" id="btn-toggle-hud" onclick="toggleMinimalHUD()" title="Hide/Show HUD">👁️</button>
+  </div>
+
+  <div id="event-banner">🔥 EVENT: Golden Tide (+50% Luck)</div>
+  <div id="interact-prompt">กด [E] เพื่อพูดคุย</div>
+
+  <!-- Fisch Fishing Minigame -->
+  <div id="fishing-minigame" class="hud-interactive">
+    <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700;">
+      <span id="mg-title" style="color:#ffd166;">🎣 กดค้าง / แตะเพื่อเลี้ยงแถบสีเขียว!</span>
+      <span id="mg-status" style="color:#4ade80;">30%</span>
+    </div>
+    <div class="mg-track" id="mg-track">
+      <div class="mg-catch-zone" id="mg-zone" style="left:35%; width:26%;"></div>
+      <div class="mg-fish-marker" id="mg-fish" style="left:48%;">🐟</div>
+    </div>
+    <div class="mg-progress-wrap">
+      <div class="mg-progress-fill" id="mg-progress"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Controls (Joystick + Action Buttons) -->
+  <div id="bottom-controls">
+    <div id="joystick-zone" class="auto-hide">
+      <div id="joystick-knob"></div>
+    </div>
+
+    <div id="action-buttons">
+      <button class="action-circle" id="btn-action-bag" onclick="openModal('bag')">🎒<span>BAG</span></button>
+      <button class="action-circle" id="btn-action-interact" onclick="handleInteract()">💬<span>[E]</span></button>
+      <button class="action-circle action-cast" id="btn-action-cast">🎣<span>CAST</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notifications -->
+<div id="toast-container"></div>
+
+<!-- Catch Reveal Card -->
+<div id="catch-popup">
+  <div id="catch-rarity" style="font-size:12px; font-weight:700; letter-spacing:1px;">LEGENDARY</div>
+  <canvas id="catch-canvas" width="96" height="64" style="width:120px; height:80px;"></canvas>
+  <div id="catch-name" style="font-size:18px; font-weight:700; color:#ffd166;">Great White Shark</div>
+  <div id="catch-details" style="font-size:13px; color:#cbd5e1;">น้ำหนัก: 142.5 KG • มูลค่า: 850 💰</div>
+  <div id="catch-perfect" style="font-size:12px; color:#4ade80; font-weight:700;">✨ PERFECT CATCH! (+25% EXP)</div>
+  <button class="btn btn-gold btn-sm" style="margin-top:4px;" onclick="closeCatchPopup()">ตกลง / OK</button>
+</div>
+
+<!-- Universal Modal -->
+<div id="modal-backdrop" onclick="if(event.target===this) closeModal()">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2 id="modal-title">Title</h2>
+      <button class="btn btn-red btn-sm" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+   PIXEL FISCH WORLD - COMPLETE SINGLE FILE ENGINE
+   ============================================================================ */
+
+// -------------------- 1. LOCALIZATION (TH / EN) --------------------
+let LANG = 'th';
+const I18N = {
+  th: {
+    subtitle: 'เกมตกปลา Pixel Art Open World ผจญภัยไร้ขีดจำกัด',
+    play: '▶ เล่นเกม (PLAY)',
+    collection: '📖 สมุดสะสมปลา',
+    settings: '⚙️ ตั้งค่า',
+    credits: '⭐ ผู้พัฒนา',
+    bag: 'กระเป๋า',
+    book: 'สมุดปลา',
+    shop: 'ร้านค้า',
+    quest: 'ภารกิจ',
+    map: 'แผนที่',
+    mp: 'เล่นกับเพื่อน',
+    cast: 'เหวี่ยงเบ็ด',
+    reel: 'ดึงเบ็ด!',
+    holdBar: '🎣 กด SPACE หรือแตะปุ่มค้างไว้ เพื่อเลี้ยงแถบจับปลา!',
+    perfect: '✨ PERFECT CATCH! โบนัส +25%',
+    sellAll: 'ขายปลาทั้งหมด',
+    equipped: 'สวมใส่อยู่',
+    equip: 'สวมใส่',
+    buy: 'ซื้อ',
+    owned: 'มีแล้ว',
+    locked: 'ปลดล็อก Lv.',
+    boardBoat: 'ขึ้น/ลงเรือ [E]',
+    talkShop: 'เปิดร้านค้า/คุย NPC [E]',
+    needWater: 'เดินไปใกล้ผิวน้ำหรือขึ้นเรือเพื่อตกปลา!',
+    bite: '❗ ปลากินเหยื่อแล้ว! รีบจับเลย!',
+    escaped: '💨 ปลาหลุดไปแล้ว! ลองใหม่อีกครั้ง',
+    saved: '💾 บันทึกเกมเรียบร้อยแล้ว'
+  },
+  en: {
+    subtitle: 'OPEN WORLD 2D PIXEL ART FISHING RPG',
+    play: '▶ PLAY',
+    collection: '📖 COLLECTION',
+    settings: '⚙️ SETTINGS',
+    credits: '⭐ CREDITS',
+    bag: 'Bag',
+    book: 'Bestiary',
+    shop: 'Shops',
+    quest: 'Quests',
+    map: 'Map',
+    mp: 'Friends',
+    cast: 'CAST',
+    reel: 'REEL!',
+    holdBar: '🎣 Hold SPACE or Touch button to keep fish inside the green bar!',
+    perfect: '✨ PERFECT CATCH! +25% Bonus',
+    sellAll: 'Sell All Fish',
+    equipped: 'Equipped',
+    equip: 'Equip',
+    buy: 'Buy',
+    owned: 'Owned',
+    locked: 'Req Lv.',
+    boardBoat: 'Board/Exit Boat [E]',
+    talkShop: 'Open Shop / Talk [E]',
+    needWater: 'Walk near water or board a boat to fish!',
+    bite: '❗ FISH ON! Reel it in!',
+    escaped: '💨 The fish got away!',
+    saved: '💾 Game Saved!'
+  }
+};
+function t(key) { return (I18N[LANG] && I18N[LANG][key]) || key; }
+
+function toggleLanguage() {
+  LANG = LANG === 'th' ? 'en' : 'th';
+  updateStaticTexts();
+  if (currentModal) openModal(currentModal);
+  showToast(LANG === 'th' ? 'เปลี่ยนภาษาเป็น: ไทย' : 'Language set to: English');
+}
+
+function updateStaticTexts() {
+  document.getElementById('menu-subtitle').textContent = t('subtitle');
+  document.getElementById('btn-play').textContent = t('play');
+  document.getElementById('btn-menu-collection').textContent = t('collection');
+  document.getElementById('btn-menu-settings').textContent = t('settings');
+  document.getElementById('btn-menu-credits').textContent = t('credits');
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const k = el.getAttribute('data-t');
+    if (I18N[LANG][k]) el.textContent = I18N[LANG][k];
+  });
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {
+      showToast(LANG === 'th' ? 'เบราว์เซอร์บล็อก Fullscreen อัตโนมัติ' : 'Fullscreen blocked by browser');
+    });
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+
+// -------------------- 2. WEB AUDIO SYNTHESIZER (SFX & AMBIENT MUSIC) --------------------
+class SoundEngine {
+  constructor() {
+    this.ctx = null;
+    this.sfxVol = 0.5;
+    this.musicVol = 0.25;
+    this.musicPlaying = false;
+    this.musicTimer = null;
+  }
+  init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AudioCtx();
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+  }
+  playTone(freq, type, duration, volMult = 1, slideTo = null) {
+    if (this.sfxVol <= 0.01) return;
+    this.init();
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, now);
+    if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, now + duration);
+    gain.gain.setValueAtTime(this.sfxVol * volMult * 0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + duration);
+  }
+  playSplash() {
+    this.playTone(220, 'triangle', 0.18, 0.9, 75);
+    setTimeout(() => this.playTone(150, 'sine', 0.22, 0.7, 50), 60);
+  }
+  playCast() {
+    this.playTone(320, 'sine', 0.25, 0.8, 680);
+  }
+  playBite() {
+    this.playTone(587.33, 'square', 0.1, 0.9);
+    setTimeout(() => this.playTone(880, 'square', 0.16, 1.0), 90);
+  }
+  playCatch(isRare = false) {
+    const notes = isRare ? [523.25, 659.25, 783.99, 1046.5, 1318.5] : [440, 554.37, 659.25, 880];
+    notes.forEach((n, i) => {
+      setTimeout(() => this.playTone(n, 'triangle', 0.22, 0.9), i * 85);
+    });
+  }
+  playCoin() {
+    this.playTone(987.77, 'sine', 0.08, 0.8);
+    setTimeout(() => this.playTone(1318.51, 'sine', 0.18, 0.8), 75);
+  }
+  playClick() {
+    this.playTone(480, 'sine', 0.05, 0.4);
+  }
+  startMusic() {
+    if (this.musicPlaying) return;
+    this.init();
+    this.musicPlaying = true;
+    const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
+    let step = 0;
+    this.musicTimer = setInterval(() => {
+      if (!this.musicPlaying || this.musicVol <= 0.01) return;
+      if (step % 2 === 0 || Math.random() > 0.45) {
+        const note = scale[(step * 3 + Math.floor(Math.random() * 3)) % scale.length];
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(note, now);
+        gain.gain.setValueAtTime(this.musicVol * 0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.65);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.65);
+      }
+      step++;
+    }, 520);
+  }
+}
+const SFX = new SoundEngine();
+
+// -------------------- 3. GAME DATABASES (56 FISH, RODS, BAITS, BOATS, BIOMES) --------------------
+const BIOMES = [
+  { id: 'starter', nameTh: 'เกาะเริ่มต้น', nameEn: 'Starter Island', cx: 1600, cy: 1600, r: 420, color: '#4ade80', sand: '#fde047', icon: '🏝️' },
+  { id: 'tropical', nameTh: 'เกาะเขตร้อน', nameEn: 'Tropical Island', cx: 3100, cy: 1100, r: 390, color: '#22c55e', sand: '#fef08a', icon: '🌴' },
+  { id: 'frozen', nameTh: 'เกาะน้ำแข็ง', nameEn: 'Frozen Island', cx: 950, cy: 3200, r: 410, color: '#e0f2fe', sand: '#bae6fd', icon: '❄️' },
+  { id: 'volcano', nameTh: 'เกาะภูเขาไฟ', nameEn: 'Volcano Island', cx: 3450, cy: 3100, r: 380, color: '#334155', sand: '#7f1d1d', icon: '🌋' },
+  { id: 'deep', nameTh: 'เขตทะเลลึก', nameEn: 'Deep Sea Trench', cx: 2200, cy: 3750, r: 480, color: '#0c4a6e', sand: '#082f49', icon: '🌑', isWaterZone: true },
+  { id: 'secret', nameTh: 'เกาะลับแห่งตำนาน', nameEn: 'Secret Island', cx: 4350, cy: 700, r: 260, color: '#a855f7', sand: '#f0abfc', icon: '✨' },
+  { id: 'ocean', nameTh: 'ทะเลกว้าง', nameEn: 'Open Ocean', cx: 2400, cy: 2400, r: 3000, color: '#0284c7', sand: '#0369a1', icon: '🌊', isWaterZone: true }
+];
+
+const RARITY_INFO = {
+  Common:    { color: '#cbd5e1', mult: 1.0, diff: 1.0, exp: 12 },
+  Uncommon:  { color: '#4ade80', mult: 1.6, diff: 1.3, exp: 25 },
+  Rare:      { color: '#38bdf8', mult: 2.8, diff: 1.7, exp: 55 },
+  Epic:      { color: '#c084fc', mult: 5.0, diff: 2.2, exp: 120 },
+  Legendary: { color: '#fbbf24', mult: 9.5, diff: 2.8, exp: 280 },
+  Mythical:  { color: '#f43f5e', mult: 18.0, diff: 3.5, exp: 650 },
+  Secret:    { color: '#2dd4bf', mult: 35.0, diff: 4.3, exp: 1500 }
+};
+
+// 56 Distinct Fish Species
+const RAW_FISH = [
+  // Starter Island (10)
+  ['ปลาซิวเงิน', 'Silver Minnow', 'Common', 'starter', 'Any', 'Any', 0.1, 0.8, 12, '#cbd5e1', '#94a3b8', 'slim'],
+  ['ปลากะพงขาว', 'Sea Bass', 'Common', 'starter', 'Any', 'Any', 1.2, 5.5, 24, '#94a3b8', '#e2e8f0', 'normal'],
+  ['ปลาทูทอง', 'Mackerel', 'Common', 'starter', 'Day', 'Any', 0.5, 2.2, 18, '#38bdf8', '#f8fafc', 'slim'],
+  ['ปลาปักเป้าจุด', 'Pufferfish', 'Uncommon', 'starter', 'Day', 'Clear', 0.8, 3.0, 45, '#facc15', '#fef08a', 'round'],
+  ['ปลาหมึกกล้วย', 'Reef Squid', 'Uncommon', 'starter', 'Night', 'Any', 0.6, 4.0, 52, '#f472b6', '#fbcfe8', 'squid'],
+  ['ปลากระเบนชายฝั่ง', 'Coastal Ray', 'Rare', 'starter', 'Any', 'Rain', 6.0, 22.0, 120, '#64748b', '#cbd5e1', 'ray'],
+  ['ปลาไหลมอเรย์', 'Moray Eel', 'Rare', 'starter', 'Night', 'Any', 3.5, 14.0, 135, '#4d7c0f', '#a3e635', 'eel'],
+  ['ปลาดาบเงิน', 'Silver Swordfish', 'Epic', 'starter', 'Day', 'Clear', 18.0, 65.0, 310, '#60a5fa', '#e0f2fe', 'sword'],
+  ['ราชาปูยักษ์', 'King Harbor Crab', 'Legendary', 'starter', 'Any', 'Rain', 12.0, 38.0, 720, '#ef4444', '#fca5a5', 'crab'],
+  ['ปลาคาร์ปจักรพรรดิ', 'Imperial Koi', 'Mythical', 'starter', 'Night', 'Clear', 8.0, 25.0, 1650, '#f97316', '#fef08a', 'normal'],
+
+  // Open Ocean (10)
+  ['ปลาซาร์ดีน', 'Ocean Sardine', 'Common', 'ocean', 'Any', 'Any', 0.2, 1.0, 15, '#93c5fd', '#eff6ff', 'slim'],
+  ['ปลาทูน่าครีบเหลือง', 'Yellowfin Tuna', 'Uncommon', 'ocean', 'Day', 'Any', 12.0, 55.0, 75, '#1d4ed8', '#facc15', 'tuna'],
+  ['ปลาอินทรี', 'King Mackerel', 'Uncommon', 'ocean', 'Any', 'Any', 5.0, 24.0, 68, '#0284c7', '#bae6fd', 'slim'],
+  ['ปลากระโทงร่ม', 'Sailfish', 'Rare', 'ocean', 'Day', 'Clear', 25.0, 90.0, 185, '#3b82f6', '#93c5fd', 'sword'],
+  ['ปลาฉลามครีบดำ', 'Blacktip Shark', 'Rare', 'ocean', 'Any', 'Any', 30.0, 110.0, 210, '#64748b', '#1e293b', 'shark'],
+  ['ปลาแสงอาทิตย์', 'Ocean Sunfish', 'Epic', 'ocean', 'Day', 'Clear', 80.0, 320.0, 440, '#94a3b8', '#f1f5f9', 'round'],
+  ['ฉลามหัวค้อน', 'Hammerhead Shark', 'Epic', 'ocean', 'Any', 'Storm', 65.0, 240.0, 490, '#475569', '#cbd5e1', 'shark'],
+  ['ฉลามขาวเจ้าสมุทร', 'Great White Shark', 'Legendary', 'ocean', 'Any', 'Any', 150.0, 650.0, 1100, '#64748b', '#f8fafc', 'shark'],
+  ['วาฬสีน้ำเงินน้อย', 'Pygmy Blue Whale', 'Mythical', 'ocean', 'Day', 'Rain', 400.0, 1400.0, 2400, '#2563eb', '#93c5fd', 'whale'],
+  ['เมกาโลดอนโบราณ', 'Ancient Megalodon', 'Secret', 'ocean', 'Night', 'Storm', 950.0, 3500.0, 5800, '#334155', '#ef4444', 'shark'],
+
+  // Tropical Island (8)
+  ['ปลาการ์ตูน', 'Clownfish', 'Common', 'tropical', 'Day', 'Clear', 0.1, 0.5, 22, '#f97316', '#ffffff', 'normal'],
+  ['ปลานกแก้ว', 'Parrotfish', 'Common', 'tropical', 'Day', 'Any', 1.0, 4.5, 32, '#2dd4bf', '#f472b6', 'normal'],
+  ['ปลาสิงโต', 'Lionfish', 'Uncommon', 'tropical', 'Any', 'Any', 0.8, 2.8, 65, '#dc2626', '#fef08a', 'spiky'],
+  ['เต่าทะเลสีเขียว', 'Green Sea Turtle', 'Rare', 'tropical', 'Day', 'Clear', 25.0, 95.0, 220, '#15803d', '#86efac', 'turtle'],
+  ['ปลากระเบนราหู', 'Manta Ray', 'Epic', 'tropical', 'Day', 'Any', 90.0, 350.0, 510, '#1e293b', '#38bdf8', 'ray'],
+  ['ปลานโปเลียน', 'Napoleon Wrasse', 'Epic', 'tropical', 'Day', 'Clear', 35.0, 120.0, 480, '#10b981', '#6ee7b7', 'normal'],
+  ['มังกรทะเลใบไม้', 'Leafy Seadragon', 'Legendary', 'tropical', 'Any', 'Fog', 2.0, 8.0, 1150, '#a3e635', '#fef08a', 'eel'],
+  ['เทพีแห่งปะการัง', 'Coral Leviathan', 'Mythical', 'tropical', 'Day', 'Rain', 180.0, 620.0, 2600, '#ec4899', '#fde047', 'serpent'],
+
+  // Frozen Island (8)
+  ['ปลาค็อดอาร์กติก', 'Arctic Cod', 'Common', 'frozen', 'Any', 'Any', 1.5, 7.0, 30, '#bae6fd', '#f8fafc', 'normal'],
+  ['ปลาแซลมอนน้ำแข็ง', 'Frost Salmon', 'Uncommon', 'frozen', 'Day', 'Any', 3.0, 14.0, 78, '#fb7185', '#e0f2fe', 'tuna'],
+  ['ปลาเฮร์ริงหิมะ', 'Snow Herring', 'Common', 'frozen', 'Any', 'Fog', 0.4, 1.8, 26, '#e2e8f0', '#93c5fd', 'slim'],
+  ['แมวน้ำเกล็ดน้ำแข็ง', 'Ice Crystal Pike', 'Rare', 'frozen', 'Day', 'Clear', 8.0, 28.0, 230, '#38bdf8', '#ffffff', 'sword'],
+  ['ปลากระเบนขั้วโลก', 'Glacier Stingray', 'Epic', 'frozen', 'Night', 'Any', 45.0, 150.0, 540, '#7dd3fc', '#1e3a8a', 'ray'],
+  ['นาร์วาฬเขาทอง', 'Golden Narwhal', 'Legendary', 'frozen', 'Night', 'Clear', 160.0, 520.0, 1350, '#cbd5e1', '#fbbf24', 'whale'],
+  ['มังกรน้ำแข็งโบราณ', 'Frostbite Wyrm', 'Mythical', 'frozen', 'Night', 'Storm', 280.0, 880.0, 2900, '#38bdf8', '#e0f2fe', 'serpent'],
+  ['วิญญาณแสงเหนือ', 'Aurora Spirit Fish', 'Secret', 'frozen', 'Night', 'Fog', 55.0, 190.0, 6200, '#34d399', '#c084fc', 'serpent'],
+
+  // Volcano Island (8)
+  ['ปลาซาลาแมนเดอร์ไฟ', 'Ember Goby', 'Common', 'volcano', 'Any', 'Any', 0.5, 2.5, 42, '#ef4444', '#f97316', 'normal'],
+  ['ปลาหินออบซิเดียน', 'Obsidian Snapper', 'Uncommon', 'volcano', 'Any', 'Any', 4.0, 16.0, 95, '#334155', '#f43f5e', 'normal'],
+  ['ปลาไหลแมกมา', 'Magma Eel', 'Rare', 'volcano', 'Night', 'Any', 9.0, 34.0, 265, '#dc2626', '#fde047', 'eel'],
+  ['ปูภูเขาไฟ', 'Volcanic Lava Crab', 'Rare', 'volcano', 'Day', 'Clear', 7.0, 26.0, 280, '#991b1b', '#fb923c', 'crab'],
+  ['ฉลามเพลิงนรก', 'Inferno Shark', 'Epic', 'volcano', 'Any', 'Storm', 85.0, 290.0, 620, '#b91c1c', '#facc15', 'shark'],
+  ['ปลาฟีนิกซ์ทองคำ', 'Phoenix Koi', 'Legendary', 'volcano', 'Day', 'Clear', 22.0, 75.0, 1500, '#f97316', '#fef08a', 'spiky'],
+  ['อสูรลาวาไททัน', 'Molten Behemoth', 'Mythical', 'volcano', 'Night', 'Any', 420.0, 1250.0, 3200, '#7f1d1d', '#fbbf24', 'whale'],
+  ['หัวใจแห่งภูเขาไฟ', 'Ignis Core Leviathan', 'Secret', 'volcano', 'Any', 'Storm', 600.0, 1800.0, 6800, '#ef4444', '#ffffff', 'serpent'],
+
+  // Deep Sea (7)
+  ['ปลาแองเกลอร์ไฟฉาย', 'Abyssal Anglerfish', 'Uncommon', 'deep', 'Night', 'Any', 3.0, 15.0, 110, '#1e293b', '#fde047', 'angler'],
+  ['ปลาหมึกยักษ์แวมไพร์', 'Vampire Squid', 'Rare', 'deep', 'Any', 'Any', 8.0, 32.0, 290, '#7e22ce', '#f43f5e', 'squid'],
+  ['ปลาออร์ฟิชยักษ์', 'Giant Oarfish', 'Epic', 'deep', 'Any', 'Fog', 60.0, 220.0, 680, '#cbd5e1', '#ef4444', 'serpent'],
+  ['หมึกมหึมาคราเคนน้อย', 'Abyssal Kraken Spawn', 'Legendary', 'deep', 'Night', 'Storm', 240.0, 780.0, 1680, '#4c1d95', '#38bdf8', 'squid'],
+  ['ฉลามก็อบลินดึกดำบรรพ์', 'Goblin Shark', 'Rare', 'deep', 'Night', 'Any', 35.0, 130.0, 310, '#f472b6', '#475569', 'shark'],
+  ['พญานาคใต้บาดาล', 'Trench Leviathan', 'Mythical', 'deep', 'Night', 'Rain', 500.0, 1600.0, 3500, '#0f172a', '#2dd4bf', 'serpent'],
+  ['ดวงตาแห่งห้วงลึก', 'The Abyssal Eye', 'Secret', 'deep', 'Night', 'Fog', 777.0, 2222.0, 7500, '#020617', '#a855f7', 'round'],
+
+  // Secret Island (5)
+  ['ปลาคริสตัลสายรุ้ง', 'Prism Crystal Fish', 'Rare', 'secret', 'Day', 'Clear', 4.0, 18.0, 420, '#38bdf8', '#f472b6', 'spiky'],
+  ['ปลามังกรสวรรค์', 'Celestial Dragonfish', 'Epic', 'secret', 'Any', 'Any', 28.0, 95.0, 880, '#fbbf24', '#38bdf8', 'serpent'],
+  ['ปลาวาฬดวงดาว', 'Starlight Whale', 'Legendary', 'secret', 'Night', 'Clear', 320.0, 980.0, 2100, '#312e81', '#fde047', 'whale'],
+  ['เทพเจ้าแห่งสายน้ำ', 'Poseidon Sacred Koi', 'Mythical', 'secret', 'Any', 'Rain', 88.0, 280.0, 4200, '#2dd4bf', '#ffd166', 'normal'],
+  ['ปลาในตำนานของภีม', 'PHEEM Cosmic Leviathan', 'Secret', 'secret', 'Any', 'Any', 999.0, 4999.0, 9999, '#ffd166', '#4cc9f0', 'serpent']
+];
+
+const FISH_DB = RAW_FISH.map((f, idx) => ({
+  id: 'fish_' + (idx + 1),
+  num: idx + 1,
+  nameTh: f[0],
+  nameEn: f[1],
+  rarity: f[2],
+  biome: f[3],
+  timePref: f[4],
+  weatherPref: f[5],
+  minKg: f[6],
+  maxKg: f[7],
+  basePrice: f[8],
+  c1: f[9],
+  c2: f[10],
+  shape: f[11]
+}));
+
+const RODS_DB = [
+  { id: 'wooden', nameTh: 'คันเบ็ดไม้ไผ่', nameEn: 'Wooden Rod', price: 0, reqLv: 1, luck: 0, control: 0.26, strength: 25, speed: 1.0, color: '#a16207' },
+  { id: 'plastic', nameTh: 'คันเบ็ดไฟเบอร์', nameEn: 'Plastic Rod', price: 250, reqLv: 2, luck: 15, control: 0.30, strength: 75, speed: 1.2, color: '#38bdf8' },
+  { id: 'carbon', nameTh: 'คันเบ็ดคาร์บอน', nameEn: 'Carbon Rod', price: 950, reqLv: 4, luck: 35, control: 0.34, strength: 220, speed: 1.45, color: '#334155' },
+  { id: 'golden', nameTh: 'คันเบ็ดทองคำ', nameEn: 'Golden Rod', price: 3200, reqLv: 7, luck: 65, control: 0.38, strength: 600, speed: 1.7, color: '#fbbf24' },
+  { id: 'mythical', nameTh: 'คันเบ็ดเทพเจ้า', nameEn: 'Mythical Rod', price: 9500, reqLv: 11, luck: 110, control: 0.43, strength: 1500, speed: 2.0, color: '#f43f5e' },
+  { id: 'legendary', nameTh: 'คันเบ็ดตำนานสมุทร', nameEn: 'Legendary Rod', price: 24000, reqLv: 16, luck: 175, control: 0.48, strength: 3500, speed: 2.35, color: '#a855f7' },
+  { id: 'secret', nameTh: 'คันเบ็ดจักรวาลลับ', nameEn: 'Secret Rod', price: 65000, reqLv: 22, luck: 280, control: 0.55, strength: 9999, speed: 2.8, color: '#2dd4bf' }
+];
+
+const BAITS_DB = [
+  { id: 'none', nameTh: 'ไม่ใช้เหยื่อ', nameEn: 'No Bait', price: 0, luck: 0, speed: 0, icon: '🪝' },
+  { id: 'worm', nameTh: 'ไส้เดือนดิน', nameEn: 'Earthworm', price: 15, luck: 12, speed: 0.15, icon: '🪱' },
+  { id: 'minnow', nameTh: 'ลูกปลาเหยื่อ', nameEn: 'Live Minnow', price: 45, luck: 28, speed: 0.25, icon: '🐟' },
+  { id: 'squid', nameTh: 'หนวดหมึกหอม', nameEn: 'Squid Tentacle', price: 110, luck: 50, speed: 0.35, icon: '🦑' },
+  { id: 'golden_shrimp', nameTh: 'กุ้งทองคำ', nameEn: 'Golden Shrimp', price: 280, luck: 95, speed: 0.5, icon: '🦐' },
+  { id: 'abyssal_lure', nameTh: 'เหยื่อเรืองแสงห้วงลึก', nameEn: 'Abyssal Lure', price: 650, luck: 160, speed: 0.75, icon: '🔮' }
+];
+
+const BOATS_DB = [
+  { id: 'wooden_boat', nameTh: 'เรือพายไม้', nameEn: 'Wooden Boat', price: 300, speed: 195, color: '#92400e', trim: '#d97706' },
+  { id: 'fishing_boat', nameTh: 'เรือประมง', nameEn: 'Fishing Boat', price: 1600, speed: 265, color: '#0284c7', trim: '#e0f2fe' },
+  { id: 'speed_boat', nameTh: 'เรือสปีดโบ๊ท', nameEn: 'Speed Boat', price: 4800, speed: 360, color: '#ef4444', trim: '#f8fafc' },
+  { id: 'luxury_boat', nameTh: 'เรือยอชท์หรู', nameEn: 'Luxury Yacht', price: 14000, speed: 440, color: '#f8fafc', trim: '#fbbf24' }
+];
+
+const MUTATIONS = [
+  { id: 'Normal', mult: 1.0, color: '#f8fafc' },
+  { id: 'Shiny', mult: 1.5, color: '#38bdf8' },
+  { id: 'Giant', mult: 1.8, color: '#4ade80' },
+  { id: 'Golden', mult: 2.5, color: '#fbbf24' },
+  { id: 'Abyssal', mult: 3.2, color: '#c084fc' }
+];
+
+// -------------------- 4. PLAYER SAVE STATE --------------------
+const DEFAULT_SAVE = {
+  name: 'Fisher_Pheem',
+  coins: 150,
+  exp: 0,
+  level: 1,
+  equippedRod: 'wooden',
+  ownedRods: ['wooden'],
+  equippedBait: 'none',
+  baits: { worm: 5 },
+  ownedBoats: [],
+  equippedBoat: null,
+  inventory: [], // { uid, fishId, kg, mutation, value }
+  bestiary: {},  // { fishId: { count, maxKg } }
+  visitedBiomes: ['starter'],
+  stats: {
+    totalCaught: 0,
+    perfectCatches: 0,
+    totalEarned: 0
+  },
+  appearance: {
+    skin: '#fcd34d',
+    shirt: '#3b82f6',
+    hat: 'cap'
+  },
+  quests: [
+    { id: 'q1', type: 'catch_count', target: 5, progress: 0, rewardCoins: 200, rewardExp: 80, done: false, titleTh: 'มือใหม่หัดตก: จับปลา 5 ตัว', titleEn: 'Novice Angler: Catch 5 Fish' },
+    { id: 'q2', type: 'catch_rare', target: 1, progress: 0, rewardCoins: 450, rewardExp: 180, done: false, titleTh: 'นักล่าปลาหายาก: จับปลาระดับ Rare ขึ้นไป', titleEn: 'Rare Hunter: Catch a Rare+ Fish' },
+    { id: 'q3', type: 'catch_weight', target: 10, progress: 0, rewardCoins: 600, rewardExp: 250, done: false, titleTh: 'จอมพลัง: จับปลาหนัก 10 KG ขึ้นไป', titleEn: 'Heavy Lifter: Catch a 10+ KG Fish' },
+    { id: 'q4', type: 'explore', target: 3, progress: 1, rewardCoins: 800, rewardExp: 320, done: false, titleTh: 'นักสำรวจทะเล: ค้นพบเกาะ 3 แห่ง', titleEn: 'Sea Explorer: Discover 3 Islands' },
+    { id: 'dq1', daily: true, type: 'catch_night', target: 3, progress: 0, rewardCoins: 500, rewardExp: 200, done: false, titleTh: '[Daily] จับปลาในเวลากลางคืน 3 ตัว', titleEn: '[Daily] Catch 3 Fish at Night' },
+    { id: 'dq2', daily: true, type: 'catch_rain', target: 2, progress: 0, rewardCoins: 700, rewardExp: 280, done: false, titleTh: '[Daily] จับปลากลางสายฝน 2 ตัว', titleEn: '[Daily] Catch 2 Fish in Rain' }
+  ],
+  achievements: []
+};
+
+let save = JSON.parse(JSON.stringify(DEFAULT_SAVE));
+
+function loadSave() {
+  try {
+    const raw = localStorage.getItem('PIXEL_FISCH_WORLD_SAVE_V1');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      save = { ...DEFAULT_SAVE, ...parsed };
+      save.appearance = { ...DEFAULT_SAVE.appearance, ...(parsed.appearance || {}) };
+      save.stats = { ...DEFAULT_SAVE.stats, ...(parsed.stats || {}) };
+    }
+  } catch (e) { console.warn('Save load failed', e); }
+}
+
+function writeSave(notify = false) {
+  try {
+    localStorage.setItem('PIXEL_FISCH_WORLD_SAVE_V1', JSON.stringify(save));
+    if (notify) showToast(t('saved'));
+  } catch (e) {}
+}
+
+// -------------------- 5. PROCEDURAL PIXEL ART SPRITE RENDERER --------------------
+function drawFishPixelArt(ctx, fish, x, y, scale = 1, silhouette = false) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+  ctx.imageSmoothingEnabled = false;
+
+  const c1 = silhouette ? '#0f172a' : fish.c1;
+  const c2 = silhouette ? '#1e293b' : fish.c2;
+
+  // Pixel grid helper (16x12 virtual pixels centered at 0,0)
+  const px = (gx, gy, w, h, col) => {
+    ctx.fillStyle = col;
+    ctx.fillRect(Math.round((gx - 8) * 3), Math.round((gy - 6) * 3), Math.round(w * 3), Math.round(h * 3));
+  };
+
+  const s = fish.shape;
+  if (s === 'squid') {
+    px(4, 2, 7, 6, c1);
+    px(5, 1, 5, 1, c1);
+    px(3, 8, 2, 3, c2);
+    px(6, 8, 2, 4, c2);
+    px(9, 8, 2, 3, c2);
+  } else if (s === 'crab') {
+    px(4, 4, 8, 5, c1);
+    px(2, 2, 2, 3, c2);
+    px(12, 2, 2, 3, c2);
+    px(3, 9, 2, 2, c2);
+    px(11, 9, 2, 2, c2);
+  } else if (s === 'ray') {
+    px(5, 2, 6, 8, c1);
+    px(3, 4, 10, 4, c1);
+    px(1, 5, 14, 2, c2);
+    px(0, 6, 3, 1, c1);
+  } else if (s === 'shark' || s === 'whale') {
+    px(3, 4, 10, 5, c1);
+    px(4, 7, 8, 2, c2);
+    px(7, 2, 2, 2, c1); // dorsal fin
+    px(1, 3, 2, 6, c1); // tail
+  } else if (s === 'serpent' || s === 'eel') {
+    px(2, 5, 4, 3, c1);
+    px(5, 3, 4, 3, c2);
+    px(8, 6, 4, 3, c1);
+    px(11, 4, 4, 3, c2);
+  } else if (s === 'sword') {
+    px(3, 4, 8, 4, c1);
+    px(4, 6, 6, 2, c2);
+    px(11, 5, 5, 1, c2); // sword bill
+    px(1, 3, 2, 6, c1);
+  } else if (s === 'round' || s === 'angler') {
+    px(4, 2, 8, 8, c1);
+    px(5, 4, 6, 5, c2);
+    px(2, 4, 2, 4, c1);
+    if (s === 'angler') px(11, 1, 2, 2, silhouette ? '#1e293b' : '#fef08a');
+  } else if (s === 'turtle') {
+    px(4, 3, 8, 6, c1);
+    px(5, 4, 6, 4, c2);
+    px(12, 5, 2, 2, c2);
+    px(3, 8, 2, 2, c2);
+    px(10, 8, 2, 2, c2);
+  } else {
+    // normal, slim, tuna, spiky
+    const h = s === 'slim' ? 3 : 5;
+    const yOff = s === 'slim' ? 5 : 4;
+    px(4, yOff, 8, h, c1);
+    px(5, yOff + 2, 6, Math.max(1, h - 2), c2);
+    px(2, yOff - 1, 2, h + 2, c1);
+    if (s === 'spiky') {
+      px(6, 2, 1, 2, c2);
+      px(8, 2, 1, 2, c2);
+      px(10, 2, 1, 2, c2);
+    }
+  }
+
+  // Eye
+  if (!silhouette) {
+    px(10, 4, 1, 1, '#0f172a');
+    px(10, 3, 1, 1, '#ffffff');
+  }
+  ctx.restore();
+}
+
+// -------------------- 6. WORLD MAP, NPCS, TREES & COLLISION --------------------
+const WORLD_SIZE = 5200;
+
+const NPCS = [
+  { id: 'merchant', x: 1520, y: 1490, biome: 'starter', color: '#fbbf24', hat: '#b45309', nameTh: 'พ่อค้ารับซื้อปลา', nameEn: 'Fish Merchant', shopTab: 'sell' },
+  { id: 'rod_npc', x: 1680, y: 1490, biome: 'starter', color: '#38bdf8', hat: '#1d4ed8', nameTh: 'ร้านคันเบ็ด (Rods)', nameEn: 'Fishing Rod Shop', shopTab: 'rods' },
+  { id: 'bait_npc', x: 1750, y: 1580, biome: 'starter', color: '#4ade80', hat: '#15803d', nameTh: 'ร้านเหยื่อตกปลา', nameEn: 'Bait Shop', shopTab: 'baits' },
+  { id: 'boat_npc', x: 1620, y: 1930, biome: 'starter', color: '#f43f5e', hat: '#9f1239', nameTh: 'อู่ต่อเรือ (Boats)', nameEn: 'Boat Shop', shopTab: 'boats' },
+  { id: 'quest_npc', x: 1450, y: 1610, biome: 'starter', color: '#c084fc', hat: '#6b21a8', nameTh: 'ผู้เฒ่ามอบภารกิจ', nameEn: 'Quest Master', shopTab: 'quests' }
+];
+
+// Generate decorative trees/rocks/landmarks deterministically
+const PROPS = [];
+(function generateWorldProps() {
+  let seed = 1337;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+
+  BIOMES.forEach(b => {
+    if (b.isWaterZone) return;
+    const count = b.id === 'secret' ? 18 : 34;
+    for (let i = 0; i < count; i++) {
+      const ang = rand() * Math.PI * 2;
+      const dist = 70 + rand() * (b.r - 125);
+      const px = b.cx + Math.cos(ang) * dist;
+      const py = b.cy + Math.sin(ang) * dist;
+      // Avoid center town plaza of starter island
+      if (b.id === 'starter' && Math.hypot(px - 1600, py - 1600) < 230) continue;
+      PROPS.push({
+        x: px,
+        y: py,
+        biome: b.id,
+        type: rand() > 0.28 ? 'tree' : 'rock',
+        phase: rand() * Math.PI * 2
+      });
+    }
+  });
+})();
+
+function getGroundInfo(x, y) {
+  // Check Starter Island Wooden Dock extending south
+  if (x >= 1570 && x <= 1630 && y >= 1900 && y <= 2070) {
+    return { isLand: true, isDock: true, biome: BIOMES[0] };
+  }
+  // Check Tropical Dock
+  if (x >= 3075 && x <= 3125 && y >= 1400 && y <= 1530) {
+    return { isLand: true, isDock: true, biome: BIOMES[1] };
+  }
+  // Check Frozen Dock
+  if (x >= 925 && x <= 975 && y >= 2740 && y <= 2860) {
+    return { isLand: true, isDock: true, biome: BIOMES[2] };
+  }
+  // Check Volcano Dock
+  if (x >= 3425 && x <= 3475 && y >= 2670 && y <= 2780) {
+    return { isLand: true, isDock: true, biome: BIOMES[3] };
+  }
+
+  // Check Islands
+  for (let i = 0; i < BIOMES.length; i++) {
+    const b = BIOMES[i];
+    if (b.isWaterZone) continue;
+    // Organic coastline distortion
+    const angle = Math.atan2(y - b.cy, x - b.cx);
+    const wobble = Math.sin(angle * 5) * 18 + Math.cos(angle * 3) * 14;
+    const d = Math.hypot(x - b.cx, y - b.cy);
+    if (d <= b.r + wobble) {
+      return { isLand: true, isDock: false, biome: b, distToEdge: (b.r + wobble) - d };
+    }
+  }
+
+  // Otherwise water: check Deep Sea or Secret vicinity or Open Ocean
+  const deep = BIOMES.find(b => b.id === 'deep');
+  if (Math.hypot(x - deep.cx, y - deep.cy) <= deep.r) {
+    return { isLand: false, biome: deep };
+  }
+  const secret = BIOMES.find(b => b.id === 'secret');
+  if (Math.hypot(x - secret.cx, y - secret.cy) <= secret.r + 160) {
+    return { isLand: false, biome: secret };
+  }
+  return { isLand: false, biome: BIOMES[6] }; // Open Ocean
+}
+
+function isNearWater(x, y) {
+  const dirs = [[0, 44], [0, -44], [44, 0], [-44, 0], [32, 32], [-32, 32], [32, -32], [-32, -32]];
+  for (const [dx, dy] of dirs) {
+    const g = getGroundInfo(x + dx, y + dy);
+    if (!g.isLand) return { x: x + dx * 1.4, y: y + dy * 1.4 };
+  }
+  return null;
+}
+
+// -------------------- 7. GAME RUNTIME STATE --------------------
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let gameState = 'MENU'; // MENU, INTRO, PLAYING
+let graphicsScale = 1.0; // 1.0 High, 0.75 Medium, 0.5 Retro Low
+
+const player = {
+  x: 1600,
+  y: 1620,
+  vx: 0,
+  vy: 0,
+  dir: 'down', // up, down, left, right
+  walkFrame: 0,
+  inBoat: false,
+  boatX: 1600,
+  boatY: 2095,
+  boatAngle: Math.PI / 2,
+  currentBiome: BIOMES[0]
+};
+
+const camera = {
+  x: 1600,
+  y: 1620,
+  zoom: 1.0
+};
+
+// Fishing state machine
+const fishing = {
+  state: 'IDLE', // IDLE, CASTING, WAITING, BITE, MINIGAME
+  bobberX: 0,
+  bobberY: 0,
+  timer: 0,
+  biteWindow: 0,
+  targetFish: null,
+  // Minigame physics
+  barPos: 0.35,      // 0..1 (left edge)
+  barWidth: 0.26,
+  barVel: 0,
+  fishPos: 0.48,     // 0..1
+  fishTarget: 0.5,
+  fishMoveTimer: 0,
+  progress: 0.32,
+  isPerfect: true,
+  holding: false
+};
+
+// Environment (Time, Weather, World Event)
+const env = {
+  timeOfDay: 8.5, // 0..24
+  weather: 'Clear', // Clear, Rain, Fog, Storm
+  weatherTimer: 90,
+  lightningAlpha: 0,
+  activeEvent: null, // { nameTh, nameEn, luckBonus, timer }
+  eventCooldown: 45,
+  particles: []
+};
+
+// Input state
+const keys = {};
+const joy = { active: false, dx: 0, dy: 0, id: null };
+
+// -------------------- 8. STARTUP & MANDATORY INTRO FLOW --------------------
+function startGameFlow() {
+  SFX.init();
+  SFX.playClick();
+  document.getElementById('main-menu').style.display = 'none';
+
+  // Mandatory Intro Splash Screen: "พัฒนาโดย:ภีม"
+  gameState = 'INTRO';
+  const splash = document.getElementById('intro-splash');
+  splash.classList.add('active');
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      splash.classList.add('visible');
+    });
+  });
+
+  // Gentle chime on credit reveal
+  SFX.playTone(523.25, 'sine', 0.6, 0.5);
+  setTimeout(() => SFX.playTone(783.99, 'sine', 0.8, 0.5), 250);
+
+  // Hold for ~3 seconds then Fade Out into Open World
+  setTimeout(() => {
+    splash.classList.remove('visible');
+    setTimeout(() => {
+      splash.classList.remove('active');
+      enterOpenWorld();
+    }, 850);
+  }, 3000);
+}
+
+function enterOpenWorld() {
+  gameState = 'PLAYING';
+  document.getElementById('hud').style.display = 'block';
+  SFX.startMusic();
+  updateHUD();
+  showToast(LANG === 'th' ? 'ยินดีต้อนรับสู่ PIXEL FISCH WORLD! เดินไปที่ริมน้ำเพื่อตกปลา' : 'Welcome to PIXEL FISCH WORLD! Walk to water to cast.');
+}
+
+// -------------------- 9. FISHING SYSTEM & FISCH MINIGAME --------------------
+function triggerCastOrAction() {
+  if (gameState !== 'PLAYING' || currentModal) return;
+
+  if (fishing.state === 'IDLE') {
+    let castTarget = null;
+    if (player.inBoat) {
+      const ang = player.boatAngle;
+      castTarget = { x: player.x + Math.cos(ang) * 75, y: player.y + Math.sin(ang) * 75 };
+    } else {
+      castTarget = isNearWater(player.x, player.y);
+    }
+
+    if (!castTarget) {
+      showToast(t('needWater'));
+      return;
+    }
+
+    SFX.playCast();
+    fishing.state = 'CASTING';
+    fishing.bobberX = castTarget.x;
+    fishing.bobberY = castTarget.y;
+    fishing.timer = 0.35;
+
+    // Face towards bobber
+    const dx = castTarget.x - player.x;
+    const dy = castTarget.y - player.y;
+    if (Math.abs(dx) > Math.abs(dy)) player.dir = dx > 0 ? 'right' : 'left';
+    else player.dir = dy > 0 ? 'down' : 'up';
+
+  } else if (fishing.state === 'WAITING') {
+    // Cancel early
+    fishing.state = 'IDLE';
+    showToast(LANG === 'th' ? 'เก็บเบ็ดกลับ' : 'Reeled line back');
+  } else if (fishing.state === 'BITE') {
+    startFishingMinigame();
+  }
+}
+
+function selectFishToHook() {
+  const rod = RODS_DB.find(r => r.id === save.equippedRod) || RODS_DB[0];
+  const bait = BAITS_DB.find(b => b.id === save.equippedBait) || BAITS_DB[0];
+  const biomeId = player.currentBiome.id;
+  const isNight = env.timeOfDay < 6 || env.timeOfDay >= 19;
+  const timeStr = isNight ? 'Night' : 'Day';
+
+  const totalLuck = rod.luck + bait.luck + (env.activeEvent ? env.activeEvent.luckBonus : 0);
+
+  // Filter fish in current biome (plus some ocean fish anywhere in water)
+  let pool = FISH_DB.filter(f => f.biome === biomeId || (biomeId !== 'starter' && f.biome === 'ocean' && Math.random() < 0.25));
+  if (pool.length === 0) pool = FISH_DB.filter(f => f.biome === 'ocean');
+
+  const rarityWeights = {
+    Common: 100,
+    Uncommon: 52 + totalLuck * 0.35,
+    Rare: 22 + totalLuck * 0.45,
+    Epic: 8 + totalLuck * 0.35,
+    Legendary: 2.5 + totalLuck * 0.22,
+    Mythical: 0.7 + totalLuck * 0.12,
+    Secret: 0.18 + totalLuck * 0.05
+  };
+
+  let weightedList = [];
+  pool.forEach(f => {
+    let w = rarityWeights[f.rarity] || 10;
+    if (f.timePref === timeStr) w *= 1.65;
+    else if (f.timePref !== 'Any') w *= 0.45;
+
+    if (f.weatherPref === env.weather) w *= 1.85;
+    else if (f.weatherPref !== 'Any') w *= 0.6;
+
+    // Rod max strength softly limits ultra-heavy fish unless luck is high
+    if (f.minKg > rod.strength * 1.4) w *= 0.25;
+
+    weightedList.push({ fish: f, weight: w });
+  });
+
+  const sum = weightedList.reduce((acc, item) => acc + item.weight, 0);
+  let r = Math.random() * sum;
+  for (const item of weightedList) {
+    r -= item.weight;
+    if (r <= 0) return item.fish;
+  }
+  return weightedList[0].fish;
+}
+
+function startFishingMinigame() {
+  const rod = RODS_DB.find(r => r.id === save.equippedRod) || RODS_DB[0];
+  const fish = selectFishToHook();
+
+  fishing.state = 'MINIGAME';
+  fishing.targetFish = fish;
+  fishing.barWidth = Math.min(0.62, Math.max(0.16, rod.control - (RARITY_INFO[fish.rarity].diff - 1) * 0.025));
+  fishing.barPos = 0.5 - fishing.barWidth / 2;
+  fishing.barVel = 0;
+  fishing.fishPos = 0.5;
+  fishing.fishTarget = 0.5;
+  fishing.fishMoveTimer = 0.3;
+  fishing.progress = 0.32;
+  fishing.isPerfect = true;
+
+  // Consume 1 bait if equipped
+  if (save.equippedBait !== 'none' && save.baits[save.equippedBait] > 0) {
+    save.baits[save.equippedBait]--;
+    if (save.baits[save.equippedBait] <= 0) save.equippedBait = 'none';
+    updateHUD();
+  }
+
+  const mgEl = document.getElementById('fishing-minigame');
+  mgEl.style.display = 'block';
+  document.getElementById('mg-title').textContent = t('holdBar');
+  document.getElementById('mg-zone').style.width = (fishing.barWidth * 100) + '%';
+}
+
+function updateFishing(dt) {
+  const rod = RODS_DB.find(r => r.id === save.equippedRod) || RODS_DB[0];
+  const bait = BAITS_DB.find(b => b.id === save.equippedBait) || BAITS_DB[0];
+
+  if (fishing.state === 'CASTING') {
+    fishing.timer -= dt;
+    if (fishing.timer <= 0) {
+      SFX.playSplash();
+      fishing.state = 'WAITING';
+      const speedMult = rod.speed + bait.speed;
+      fishing.timer = Math.max(1.1, (4.2 / speedMult) + Math.random() * 2.5);
+    }
+  } else if (fishing.state === 'WAITING') {
+    fishing.timer -= dt;
+    if (fishing.timer <= 0) {
+      SFX.playBite();
+      fishing.state = 'BITE';
+      fishing.biteWindow = 1.65;
+      showToast(t('bite'));
+    }
+  } else if (fishing.state === 'BITE') {
+    fishing.biteWindow -= dt;
+    if (fishing.biteWindow <= 0) {
+      fishing.state = 'IDLE';
+      showToast(t('escaped'));
+    }
+  } else if (fishing.state === 'MINIGAME') {
+    const diff = RARITY_INFO[fishing.targetFish.rarity].diff;
+
+    // Catch bar physics (Gravity pulls left, holding accelerates right)
+    const accel = fishing.holding ? 1.85 : -1.55;
+    fishing.barVel += accel * dt;
+    fishing.barVel *= Math.pow(0.12, dt); // damping
+    fishing.barPos += fishing.barVel * dt;
+
+    if (fishing.barPos < 0) {
+      fishing.barPos = 0;
+      fishing.barVel = Math.max(0, -fishing.barVel * 0.35);
+    }
+    if (fishing.barPos + fishing.barWidth > 1) {
+      fishing.barPos = 1 - fishing.barWidth;
+      fishing.barVel = Math.min(0, -fishing.barVel * 0.35);
+    }
+
+    // Fish erratic AI movement
+    fishing.fishMoveTimer -= dt;
+    if (fishing.fishMoveTimer <= 0) {
+      fishing.fishTarget = 0.06 + Math.random() * 0.88;
+      fishing.fishMoveTimer = Math.max(0.28, (1.15 / diff) + Math.random() * 0.55);
+    }
+    const fishSpeed = 0.45 + diff * 0.38;
+    const delta = fishing.fishTarget - fishing.fishPos;
+    fishing.fishPos += Math.sign(delta) * Math.min(Math.abs(delta), fishSpeed * dt);
+
+    // Check overlap
+    const inside = fishing.fishPos >= fishing.barPos && fishing.fishPos <= (fishing.barPos + fishing.barWidth);
+    if (inside) {
+      fishing.progress += (0.26 + rod.speed * 0.03) * dt;
+    } else {
+      fishing.isPerfect = false;
+      const drain = Math.max(0.11, 0.21 - (rod.strength / 12000));
+      fishing.progress -= drain * dt;
+    }
+
+    // Update Minigame DOM
+    document.getElementById('mg-zone').style.left = (fishing.barPos * 100) + '%';
+    document.getElementById('mg-fish').style.left = (fishing.fishPos * 100) + '%';
+    const pct = Math.max(0, Math.min(100, Math.round(fishing.progress * 100)));
+    document.getElementById('mg-progress').style.width = pct + '%';
+    document.getElementById('mg-status').textContent = pct + '%';
+
+    if (fishing.progress >= 1) {
+      completeCatch();
+    } else if (fishing.progress <= 0) {
+      document.getElementById('fishing-minigame').style.display = 'none';
+      fishing.state = 'IDLE';
+      showToast(t('escaped'));
+    }
+  }
+}
+
+function completeCatch() {
+  document.getElementById('fishing-minigame').style.display = 'none';
+  fishing.state = 'IDLE';
+
+  const fish = fishing.targetFish;
+  const isHighRarity = ['Rare', 'Epic', 'Legendary', 'Mythical', 'Secret'].includes(fish.rarity);
+  SFX.playCatch(isHighRarity);
+
+  // Random Weight & Mutation
+  const kg = +(fish.minKg + Math.pow(Math.random(), 1.35) * (fish.maxKg - fish.minKg)).toFixed(2);
+  let mutation = MUTATIONS[0];
+  const mRoll = Math.random();
+  if (mRoll < 0.02) mutation = MUTATIONS[4];
+  else if (mRoll < 0.06) mutation = MUTATIONS[3];
+  else if (mRoll < 0.13) mutation = MUTATIONS[2];
+  else if (mRoll < 0.24) mutation = MUTATIONS[1];
+
+  const weightRatio = 0.7 + (kg / Math.max(1, fish.maxKg)) * 0.8;
+  const perfectMult = fishing.isPerfect ? 1.25 : 1.0;
+  const value = Math.max(5, Math.round(fish.basePrice * weightRatio * mutation.mult * perfectMult));
+
+  // Add to inventory
+  save.inventory.push({
+    uid: Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+    fishId: fish.id,
+    kg,
+    mutation: mutation.id,
+    value
+  });
+
+  // Update Bestiary
+  if (!save.bestiary[fish.id]) {
+    save.bestiary[fish.id] = { count: 0, maxKg: 0 };
+  }
+  save.bestiary[fish.id].count++;
+  if (kg > save.bestiary[fish.id].maxKg) save.bestiary[fish.id].maxKg = kg;
+
+  // Stats & EXP
+  save.stats.totalCaught++;
+  if (fishing.isPerfect) save.stats.perfectCatches++;
+  const gainedExp = Math.round(RARITY_INFO[fish.rarity].exp * perfectMult);
+  addExp(gainedExp);
+
+  // Update Quests
+  updateQuestProgress(fish, kg);
+  writeSave(false);
+  updateHUD();
+
+  // Broadcast to Multiplayer if connected
+  sendMP({
+    type: 'catch',
+    fishName: LANG === 'th' ? fish.nameTh : fish.nameEn,
+    rarity: fish.rarity,
+    kg
+  });
+
+  // Show Catch Popup
+  showCatchPopup(fish, kg, mutation, value, fishing.isPerfect);
+}
+
+function showCatchPopup(fish, kg, mutation, value, isPerfect) {
+  const pop = document.getElementById('catch-popup');
+  const rarEl = document.getElementById('catch-rarity');
+  rarEl.textContent = `${fish.rarity.toUpperCase()} ${mutation.id !== 'Normal' ? '• ' + mutation.id.toUpperCase() : ''}`;
+  rarEl.style.color = RARITY_INFO[fish.rarity].color;
+
+  const c = document.getElementById('catch-canvas');
+  const cctx = c.getContext('2d');
+  cctx.clearRect(0, 0, c.width, c.height);
+  drawFishPixelArt(cctx, fish, 48, 32, 1.85, false);
+
+  document.getElementById('catch-name').textContent = LANG === 'th' ? fish.nameTh : fish.nameEn;
+  document.getElementById('catch-details').textContent =
+    LANG === 'th' ? `น้ำหนัก: ${kg} KG • ราคาขาย: ${value} 💰` : `Weight: ${kg} KG • Value: ${value} 💰`;
+  document.getElementById('catch-perfect').style.display = isPerfect ? 'block' : 'none';
+
+  pop.style.display = 'flex';
+}
+
+function closeCatchPopup() {
+  document.getElementById('catch-popup').style.display = 'none';
+}
+
+function addExp(amount) {
+  save.exp += amount;
+  let req = save.level * 120;
+  while (save.exp >= req) {
+    save.exp -= req;
+    save.level++;
+    req = save.level * 120;
+    SFX.playCatch(true);
+    showToast(LANG === 'th' ? `🎉 เลเวลอัป! ตอนนี้คุณเลเวล ${save.level}` : `🎉 LEVEL UP! You are now Lv.${save.level}`);
+  }
+}
+
+function updateQuestProgress(fish, kg) {
+  const isNight = env.timeOfDay < 6 || env.timeOfDay >= 19;
+  const highRarities = ['Rare', 'Epic', 'Legendary', 'Mythical', 'Secret'];
+
+  save.quests.forEach(q => {
+    if (q.done) return;
+    if (q.type === 'catch_count') q.progress++;
+    if (q.type === 'catch_rare' && highRarities.includes(fish.rarity)) q.progress++;
+    if (q.type === 'catch_weight' && kg >= q.target) q.progress = q.target;
+    if (q.type === 'catch_night' && isNight) q.progress++;
+    if (q.type === 'catch_rain' && (env.weather === 'Rain' || env.weather === 'Storm')) q.progress++;
+
+    if (q.progress >= q.target) {
+      q.progress = q.target;
+      q.done = true;
+      save.coins += q.rewardCoins;
+      addExp(q.rewardExp);
+      showToast(LANG === 'th'
+        ? `✅ ภารกิจสำเร็จ! +${q.rewardCoins} 💰 +${q.rewardExp} EXP`
+        : `✅ Quest Complete! +${q.rewardCoins} 💰 +${q.rewardExp} EXP`);
+    }
+  });
+}
+
+// -------------------- 10. PLAYER MOVEMENT, BOATS & INTERACTION --------------------
+function getNearestNPC() {
+  for (const npc of NPCS) {
+    if (Math.hypot(player.x - npc.x, player.y - npc.y) < 75) return npc;
+  }
+  return null;
+}
+
+function handleInteract() {
+  if (gameState !== 'PLAYING' || currentModal) return;
+  SFX.playClick();
+
+  // 1. Check NPC
+  const npc = getNearestNPC();
+  if (npc) {
+    if (npc.shopTab === 'quests') openModal('quests');
+    else openModal('shop', npc.shopTab);
+    return;
+  }
+
+  // 2. Check Boat Boarding / Disembarking
+  if (save.ownedBoats.length > 0) {
+    if (player.inBoat) {
+      // Find nearby land/dock to step onto
+      const dirs = [[0, -55], [0, 55], [-55, 0], [55, 0], [-40, -40], [40, -40], [-40, 40], [40, 40]];
+      for (const [dx, dy] of dirs) {
+        const g = getGroundInfo(player.x + dx, player.y + dy);
+        if (g.isLand) {
+          player.inBoat = false;
+          player.boatX = player.x;
+          player.boatY = player.y;
+          player.x += dx;
+          player.y += dy;
+          fishing.state = 'IDLE';
+          showToast(LANG === 'th' ? 'ขึ้นฝั่งเรียบร้อยแล้ว' : 'Stepped ashore!');
+          return;
+        }
+      }
+      showToast(LANG === 'th' ? 'ขับเรือเข้าใกล้ฝั่งหรือท่าเรือเพื่อขึ้นฝั่ง' : 'Sail closer to shore or dock to disembark');
+    } else {
+      // Board boat if near boat or near water
+      const distToBoat = Math.hypot(player.x - player.boatX, player.y - player.boatY);
+      const waterSpot = isNearWater(player.x, player.y);
+      if (distToBoat < 110) {
+        player.inBoat = true;
+        player.x = player.boatX;
+        player.y = player.boatY;
+        fishing.state = 'IDLE';
+        showToast(LANG === 'th' ? 'ขึ้นเรือแล้ว! ใช้ปุ่มเดินเพื่อขับเรือออกทะเล' : 'Boarded boat! Steer across the sea.');
+      } else if (waterSpot) {
+        // Summon boat to water edge
+        player.boatX = waterSpot.x;
+        player.boatY = waterSpot.y;
+        player.inBoat = true;
+        player.x = player.boatX;
+        player.y = player.boatY;
+        fishing.state = 'IDLE';
+        showToast(LANG === 'th' ? 'เรียกเรือและออกเดินทาง!' : 'Summoned boat & embarked!');
+      }
+    }
+  } else {
+    if (isNearWater(player.x, player.y)) {
+      showToast(LANG === 'th' ? 'ซื้อเรือได้ที่อู่ต่อเรือทางใต้ของเกาะเริ่มต้น!' : 'Buy a boat at the Boat Shop south of Starter Island!');
+    }
+  }
+}
+
+function updatePlayer(dt) {
+  if (fishing.state === 'MINIGAME') return;
+
+  let mx = 0, my = 0;
+  if (keys['KeyW'] || keys['ArrowUp']) my -= 1;
+  if (keys['KeyS'] || keys['ArrowDown']) my += 1;
+  if (keys['KeyA'] || keys['ArrowLeft']) mx -= 1;
+  if (keys['KeyD'] || keys['ArrowRight']) mx += 1;
+
+  if (joy.active) {
+    mx += joy.dx;
+    my += joy.dy;
+  }
+
+  const len = Math.hypot(mx, my);
+  if (len > 0) {
+    mx /= Math.max(1, len);
+    my /= Math.max(1, len);
+
+    // Cancel cast if moving
+    if (fishing.state === 'CASTING' || fishing.state === 'WAITING' || fishing.state === 'BITE') {
+      fishing.state = 'IDLE';
+    }
+
+    if (Math.abs(mx) > Math.abs(my)) player.dir = mx > 0 ? 'right' : 'left';
+    else player.dir = my > 0 ? 'down' : 'up';
+
+    let moveSpeed = 165;
+    if (player.inBoat) {
+      const boat = BOATS_DB.find(b => b.id === save.equippedBoat) || BOATS_DB[0];
+      moveSpeed = boat.speed;
+      player.boatAngle = Math.atan2(my, mx);
+    }
+
+    const nx = Math.max(80, Math.min(WORLD_SIZE - 80, player.x + mx * moveSpeed * dt));
+    const ny = Math.max(80, Math.min(WORLD_SIZE - 80, player.y + my * moveSpeed * dt));
+    const ground = getGroundInfo(nx, ny);
+
+    if (player.inBoat) {
+      // Boat moves on water only
+      if (!ground.isLand) {
+        player.x = nx;
+        player.y = ny;
+        player.boatX = nx;
+        player.boatY = ny;
+      }
+    } else {
+      // Player walks on land/docks only
+      if (ground.isLand) {
+        player.x = nx;
+        player.y = ny;
+      }
+    }
+
+    player.walkFrame += dt * 8;
+  } else {
+    player.walkFrame = 0;
+  }
+
+  // Update Current Biome & Discovery
+  const curG = getGroundInfo(player.x, player.y);
+  player.currentBiome = curG.biome;
+  if (!save.visitedBiomes.includes(curG.biome.id)) {
+    save.visitedBiomes.push(curG.biome.id);
+    const bName = LANG === 'th' ? curG.biome.nameTh : curG.biome.nameEn;
+    showToast(LANG === 'th' ? `🗺️ ค้นพบพื้นที่ใหม่: ${bName}!` : `🗺️ Discovered: ${bName}!`);
+    save.quests.forEach(q => {
+      if (!q.done && q.type === 'explore') {
+        q.progress = save.visitedBiomes.length;
+        if (q.progress >= q.target) {
+          q.done = true;
+          save.coins += q.rewardCoins;
+          addExp(q.rewardExp);
+        }
+      }
+    });
+  }
+
+  // Smooth Camera Follow
+  camera.x += (player.x - camera.x) * Math.min(1, dt * 7.5);
+  camera.y += (player.y - camera.y) * Math.min(1, dt * 7.5);
+
+  // Context Prompt
+  const promptEl = document.getElementById('interact-prompt');
+  const npc = getNearestNPC();
+  if (npc) {
+    promptEl.style.display = 'block';
+    promptEl.textContent = `${LANG === 'th' ? npc.nameTh : npc.nameEn} — ${t('talkShop')}`;
+  } else if (save.ownedBoats.length > 0 && (player.inBoat || Math.hypot(player.x - player.boatX, player.y - player.boatY) < 110 || isNearWater(player.x, player.y))) {
+    promptEl.style.display = 'block';
+    promptEl.textContent = t('boardBoat');
+  } else {
+    promptEl.style.display = 'none';
+  }
+}
+
+// -------------------- 11. ENVIRONMENT: DAY/NIGHT, WEATHER & WORLD EVENTS --------------------
+function updateEnvironment(dt) {
+  // Advance Time (1 real second = 4 in-game minutes)
+  env.timeOfDay = (env.timeOfDay + dt * (4 / 60)) % 24;
+
+  // Weather Cycle
+  env.weatherTimer -= dt;
+  if (env.weatherTimer <= 0) {
+    const weathers = ['Clear', 'Clear', 'Rain', 'Fog', 'Storm'];
+    env.weather = weathers[Math.floor(Math.random() * weathers.length)];
+    env.weatherTimer = 55 + Math.random() * 45;
+    showToast(LANG === 'th' ? `🌦️ สภาพอากาศเปลี่ยนเป็น: ${env.weather}` : `🌦️ Weather changed to: ${env.weather}`);
+  }
+
+  if (env.weather === 'Storm' && Math.random() < 0.004) {
+    env.lightningAlpha = 0.65;
+    SFX.playTone(90, 'sawtooth', 0.45, 0.8, 35);
+  }
+  if (env.lightningAlpha > 0) {
+    env.lightningAlpha = Math.max(0, env.lightningAlpha - dt * 2.2);
+  }
+
+  // World Events
+  const banner = document.getElementById('event-banner');
+  if (env.activeEvent) {
+    env.activeEvent.timer -= dt;
+    const evName = LANG === 'th' ? env.activeEvent.nameTh : env.activeEvent.nameEn;
+    banner.style.display = 'block';
+    banner.textContent = `🔥 ${evName} (${Math.ceil(env.activeEvent.timer)}s)`;
+    if (env.activeEvent.timer <= 0) {
+      env.activeEvent = null;
+      banner.style.display = 'none';
+    }
+  } else {
+    env.eventCooldown -= dt;
+    if (env.eventCooldown <= 0) {
+      const events = [
+        { nameTh: 'กระแสน้ำทองคำ (+60% โชค)', nameEn: 'Golden Tide (+60% Luck)', luckBonus: 60, timer: 45 },
+        { nameTh: 'แสงออโรร่าแห่งโชคลาภ (+90% โชค)', nameEn: 'Aurora Luck Surge (+90% Luck)', luckBonus: 90, timer: 40 },
+        { nameTh: 'ฝูงปลาหายากอพยพ (+75% โชค)', nameEn: 'Rare Migration (+75% Luck)', luckBonus: 75, timer: 45 }
+      ];
+      env.activeEvent = { ...events[Math.floor(Math.random() * events.length)] };
+      env.eventCooldown = 75;
+      showToast('✨ ' + (LANG === 'th' ? env.activeEvent.nameTh : env.activeEvent.nameEn));
+    }
+  }
+}
+
+// -------------------- 12. CANVAS 2D PIXEL ART RENDERING --------------------
+let globalTime = 0;
+
+function renderWorld() {
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.imageSmoothingEnabled = false;
+
+  // Deep Ocean Base
+  const isDeep = player.currentBiome.id === 'deep';
+  ctx.fillStyle = isDeep ? '#062038' : '#0369a1';
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.save();
+  const halfW = w / 2;
+  const halfH = h / 2;
+  ctx.translate(Math.round(halfW - camera.x), Math.round(halfH - camera.y));
+
+  // Animated Water Grid & Waves (only draw visible tiles)
+  const tileSize = 64;
+  const startCol = Math.floor((camera.x - halfW) / tileSize) - 1;
+  const endCol = Math.ceil((camera.x + halfW) / tileSize) + 1;
+  const startRow = Math.floor((camera.y - halfH) / tileSize) - 1;
+  const endRow = Math.ceil((camera.y + halfH) / tileSize) + 1;
+
+  for (let r = startRow; r <= endRow; r++) {
+    for (let c = startCol; c <= endCol; c++) {
+      const wx = c * tileSize;
+      const wy = r * tileSize;
+      if (wx < 0 || wy < 0 || wx > WORLD_SIZE || wy > WORLD_SIZE) continue;
+
+      // Subtle ocean depth checkers
+      if ((r + c) % 2 === 0) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+        ctx.fillRect(wx, wy, tileSize, tileSize);
+      }
+
+      // Animated pixel wave crests
+      const wavePhase = Math.sin(globalTime * 2.2 + c * 0.7 + r * 0.5);
+      if (wavePhase > 0.55) {
+        ctx.fillStyle = 'rgba(186, 230, 253, 0.25)';
+        const ox = Math.sin(globalTime * 1.5 + r) * 6;
+        ctx.fillRect(wx + 16 + ox, wy + 28, 22, 4);
+        ctx.fillRect(wx + 20 + ox, wy + 24, 14, 4);
+      }
+    }
+  }
+
+  // Deep Sea Trench Dark Zone Circle
+  const deepZone = BIOMES.find(b => b.id === 'deep');
+  ctx.fillStyle = 'rgba(2, 6, 23, 0.45)';
+  ctx.beginPath();
+  ctx.arc(deepZone.cx, deepZone.cy, deepZone.r, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Render Islands
+  BIOMES.forEach(b => {
+    if (b.isWaterZone) return;
+    if (Math.hypot(b.cx - camera.x, b.cy - camera.y) > b.r + Math.max(halfW, halfH) + 150) return;
+
+    // Shoreline Foam Ring
+    const foamPulse = Math.sin(globalTime * 3) * 5;
+    ctx.fillStyle = 'rgba(224, 242, 254, 0.42)';
+    drawOrganicIsland(b.cx, b.cy, b.r + 16 + foamPulse);
+
+    // Sandy Beach
+    ctx.fillStyle = b.sand;
+    drawOrganicIsland(b.cx, b.cy, b.r);
+
+    // Inner Grass / Snow / Obsidian
+    ctx.fillStyle = b.color;
+    drawOrganicIsland(b.cx, b.cy, b.r - 34);
+
+    // Volcano Lava Pool
+    if (b.id === 'volcano') {
+      ctx.fillStyle = '#ea580c';
+      ctx.beginPath();
+      ctx.arc(b.cx, b.cy, 78 + Math.sin(globalTime * 4) * 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath();
+      ctx.arc(b.cx, b.cy, 42, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+
+  // Render Wooden Docks
+  drawDock(1570, 1900, 60, 170);
+  drawDock(3075, 1400, 50, 130);
+  drawDock(925, 2740, 50, 120);
+  drawDock(3425, 2670, 50, 110);
+
+  // Starter Island Town Plaza & Shop Stalls
+  ctx.fillStyle = '#d6d3d1';
+  ctx.fillRect(1420, 1450, 360, 210);
+  ctx.strokeStyle = '#78716c';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(1420, 1450, 360, 210);
+
+  // Draw Shop Roofs behind NPCs
+  drawShopStall(1520, 1445, '#f59e0b', 'FISH');
+  drawShopStall(1680, 1445, '#0284c7', 'RODS');
+  drawShopStall(1755, 1545, '#16a34a', 'BAIT');
+  drawShopStall(1620, 1890, '#e11d48', 'BOAT');
+
+  // Render Trees & Rocks with Shadows
+  PROPS.forEach(p => {
+    if (Math.abs(p.x - camera.x) > halfW + 80 || Math.abs(p.y - camera.y) > halfH + 80) return;
+    if (p.type === 'tree') {
+      // Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.22)';
+      ctx.beginPath();
+      ctx.ellipse(p.x + 8, p.y + 18, 22, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      const sway = Math.sin(globalTime * 2 + p.phase) * 3;
+      // Trunk
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(p.x - 5, p.y - 6, 10, 24);
+      // Foliage
+      ctx.fillStyle = p.biome === 'frozen' ? '#bae6fd' : (p.biome === 'volcano' ? '#7f1d1d' : (p.biome === 'secret' ? '#c084fc' : '#15803d'));
+      ctx.fillRect(p.x - 20 + sway, p.y - 32, 40, 28);
+      ctx.fillStyle = p.biome === 'frozen' ? '#f0f9ff' : (p.biome === 'volcano' ? '#ea580c' : (p.biome === 'secret' ? '#f0abfc' : '#22c55e'));
+      ctx.fillRect(p.x - 15 + sway, p.y - 42, 30, 18);
+    } else {
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.fillRect(p.x - 14, p.y + 8, 32, 10);
+      ctx.fillStyle = p.biome === 'volcano' ? '#1e293b' : '#64748b';
+      ctx.fillRect(p.x - 16, p.y - 10, 32, 22);
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(p.x - 12, p.y - 10, 20, 8);
+    }
+  });
+
+  // Render NPCs
+  NPCS.forEach(npc => {
+    drawCharacter(npc.x, npc.y, 'down', 0, '#fde68a', npc.color, npc.hat, LANG === 'th' ? npc.nameTh : npc.nameEn, true);
+  });
+
+  // Render Parked Boat if owned and not currently driving
+  if (save.ownedBoats.length > 0 && !player.inBoat) {
+    const boat = BOATS_DB.find(b => b.id === save.equippedBoat) || BOATS_DB[0];
+    drawBoat(player.boatX, player.boatY, player.boatAngle, boat);
+  }
+
+  // Render Other Multiplayer Players
+  Object.values(mpPlayers).forEach(mp => {
+    drawCharacter(mp.x, mp.y, mp.dir || 'down', mp.walk || 0, '#fcd34d', mp.shirt || '#ec4899', 'cap', mp.name || 'Friend', false);
+  });
+
+  // Render Player (and Boat if driving)
+  if (player.inBoat) {
+    const boat = BOATS_DB.find(b => b.id === save.equippedBoat) || BOATS_DB[0];
+    drawBoat(player.x, player.y, player.boatAngle, boat);
+  }
+  drawCharacter(
+    player.x,
+    player.inBoat ? player.y - 6 : player.y,
+    player.dir,
+    player.inBoat ? 0 : player.walkFrame,
+    save.appearance.skin,
+    save.appearance.shirt,
+    save.appearance.hat,
+    save.name,
+    false,
+    true
+  );
+
+  // Render Fishing Line & Bobber
+  if (fishing.state !== 'IDLE') {
+    const rod = RODS_DB.find(r => r.id === save.equippedRod) || RODS_DB[0];
+    const tipX = player.x + (player.dir === 'left' ? -24 : player.dir === 'right' ? 24 : 8);
+    const tipY = player.y - 18;
+
+    // Fishing Line
+    ctx.strokeStyle = '#f8fafc';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(tipX, tipY);
+    ctx.quadraticCurveTo((tipX + fishing.bobberX) / 2, Math.max(tipY, fishing.bobberY) + 14, fishing.bobberX, fishing.bobberY);
+    ctx.stroke();
+
+    // Water Ripples around Bobber
+    const ripple = (globalTime * 24) % 22;
+    ctx.strokeStyle = `rgba(255,255,255,${1 - ripple / 22})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(fishing.bobberX, fishing.bobberY, 4 + ripple, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Bobber Sprite
+    const bobOffset = Math.sin(globalTime * 5) * 2 + (fishing.state === 'BITE' ? Math.sin(globalTime * 35) * 4 : 0);
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(fishing.bobberX - 5, fishing.bobberY - 5 + bobOffset, 10, 5);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(fishing.bobberX - 5, fishing.bobberY + bobOffset, 10, 5);
+
+    // Exclamation Mark Alert on Bite
+    if (fishing.state === 'BITE') {
+      ctx.fillStyle = '#facc15';
+      ctx.font = 'bold 24px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('!', fishing.bobberX, fishing.bobberY - 18);
+    }
+  }
+
+  ctx.restore();
+
+  // Weather Particles (Rain / Snow)
+  if (env.weather === 'Rain' || env.weather === 'Storm') {
+    ctx.strokeStyle = 'rgba(186, 230, 253, 0.55)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i < 65; i++) {
+      const rx = ((i * 197 + globalTime * 380) % (w + 100)) - 50;
+      const ry = ((i * 311 + globalTime * 680) % (h + 100)) - 50;
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(rx - 8, ry + 18);
+    }
+    ctx.stroke();
+  } else if (player.currentBiome.id === 'frozen') {
+    ctx.fillStyle = 'rgba(255,255,255,0.75)';
+    for (let i = 0; i < 35; i++) {
+      const sx = (i * 233 + Math.sin(globalTime + i) * 30) % w;
+      const sy = (i * 173 + globalTime * 65) % h;
+      ctx.fillRect(sx, sy, 4, 4);
+    }
+  }
+
+  // Fog Overlay
+  if (env.weather === 'Fog') {
+    ctx.fillStyle = 'rgba(203, 213, 225, 0.24)';
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  // Day/Night Ambient Tint
+  let nightAlpha = 0;
+  if (env.timeOfDay >= 19 || env.timeOfDay < 5.5) nightAlpha = 0.44;
+  else if (env.timeOfDay >= 17.5) nightAlpha = ((env.timeOfDay - 17.5) / 1.5) * 0.44;
+  else if (env.timeOfDay < 7) nightAlpha = ((7 - env.timeOfDay) / 1.5) * 0.44;
+
+  if (nightAlpha > 0.01) {
+    ctx.fillStyle = `rgba(6, 12, 34, ${nightAlpha})`;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  // Storm Lightning Flash
+  if (env.lightningAlpha > 0) {
+    ctx.fillStyle = `rgba(255, 255, 255, ${env.lightningAlpha})`;
+    ctx.fillRect(0, 0, w, h);
+  }
+}
+
+function drawOrganicIsland(cx, cy, radius) {
+  ctx.beginPath();
+  const steps = 36;
+  for (let i = 0; i <= steps; i++) {
+    const a = (i / steps) * Math.PI * 2;
+    const wobble = Math.sin(a * 5) * 18 + Math.cos(a * 3) * 14;
+    const r = Math.max(10, radius + wobble);
+    const px = cx + Math.cos(a) * r;
+    const py = cy + Math.sin(a) * r;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawDock(x, y, w, h) {
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.fillRect(x + 4, y + 6, w, h);
+  ctx.fillStyle = '#78350f';
+  ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = '#92400e';
+  for (let py = y + 6; py < y + h; py += 14) {
+    ctx.fillRect(x + 2, py, w - 4, 8);
+  }
+}
+
+function drawShopStall(x, y, color, label) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x - 28, y - 22, 56, 20);
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(x - 28, y - 8, 56, 6);
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 9px "Press Start 2P", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(label, x, y - 10);
+}
+
+function drawBoat(x, y, angle, boat) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  // Water wake
+  ctx.fillStyle = 'rgba(224, 242, 254, 0.35)';
+  ctx.fillRect(-38, -14, 18, 28);
+  // Hull
+  ctx.fillStyle = boat.color;
+  ctx.beginPath();
+  ctx.moveTo(32, 0);
+  ctx.lineTo(12, -16);
+  ctx.lineTo(-28, -16);
+  ctx.lineTo(-28, 16);
+  ctx.lineTo(12, 16);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = boat.trim;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawCharacter(x, y, dir, walkFrame, skin, shirt, hat, label, isNpc = false, showRod = false) {
+  const bob = Math.abs(Math.sin(walkFrame)) * 3;
+  const legSwing = Math.sin(walkFrame) * 4;
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  ctx.beginPath();
+  ctx.ellipse(x, y + 14, 12, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Legs
+  ctx.fillStyle = '#1e293b';
+  ctx.fillRect(x - 7, y + 4 + legSwing, 5, 10);
+  ctx.fillRect(x + 2, y + 4 - legSwing, 5, 10);
+
+  // Body / Shirt
+  ctx.fillStyle = shirt;
+  ctx.fillRect(x - 9, y - 10 - bob, 18, 15);
+
+  // Head
+  ctx.fillStyle = skin;
+  ctx.fillRect(x - 8, y - 24 - bob, 16, 14);
+
+  // Eyes
+  ctx.fillStyle = '#0f172a';
+  if (dir !== 'up') {
+    const ex = dir === 'left' ? -5 : dir === 'right' ? 2 : -4;
+    ctx.fillRect(x + ex, y - 18 - bob, 3, 3);
+    if (dir === 'down') ctx.fillRect(x + 2, y - 18 - bob, 3, 3);
+  }
+
+  // Hat / Hair
+  if (hat === 'cap') {
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(x - 9, y - 27 - bob, 18, 5);
+    ctx.fillRect(x - 6, y - 24 - bob, 14, 3);
+  } else if (hat === 'straw') {
+    ctx.fillStyle = '#facc15';
+    ctx.fillRect(x - 13, y - 25 - bob, 26, 4);
+    ctx.fillRect(x - 8, y - 29 - bob, 16, 5);
+  } else if (hat === 'crown') {
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillRect(x - 8, y - 29 - bob, 16, 5);
+  } else if (typeof hat === 'string' && hat.startsWith('#')) {
+    ctx.fillStyle = hat;
+    ctx.fillRect(x - 9, y - 27 - bob, 18, 5);
+  }
+
+  // Equipped Fishing Rod in Hand
+  if (showRod) {
+    const rod = RODS_DB.find(r => r.id === save.equippedRod) || RODS_DB[0];
+    ctx.strokeStyle = rod.color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    const rx = dir === 'left' ? x - 8 : x + 8;
+    const tipX = dir === 'left' ? x - 24 : x + 24;
+    ctx.moveTo(rx, y - 2 - bob);
+    ctx.lineTo(tipX, y - 22 - bob);
+    ctx.stroke();
+  }
+
+  // Floating Name Tag
+  if (label) {
+    ctx.font = 'bold 11px "Chakra Petch", sans-serif';
+    ctx.textAlign = 'center';
+    const tw = ctx.measureText(label).width + 10;
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.72)';
+    ctx.fillRect(x - tw / 2, y - 44 - bob, tw, 15);
+    ctx.fillStyle = isNpc ? '#ffd166' : '#ffffff';
+    ctx.fillText(label, x, y - 33 - bob);
+  }
+}
+
+// -------------------- 13. HUD & MODALS --------------------
+let currentModal = null;
+let hudHidden = false;
+
+function updateHUD() {
+  document.getElementById('hud-level').textContent = `Lv.${save.level}`;
+  document.getElementById('hud-coins').textContent = `💰 ${save.coins.toLocaleString()}`;
+  const bName = LANG === 'th' ? player.currentBiome.nameTh : player.currentBiome.nameEn;
+  document.getElementById('hud-biome').textContent = `${player.currentBiome.icon} ${bName}`;
+
+  const req = save.level * 120;
+  document.getElementById('hud-exp-bar').style.width = Math.min(100, (save.exp / req) * 100) + '%';
+
+  const rod = RODS_DB.find(r => r.id === save.equippedRod) || RODS_DB[0];
+  const bait = BAITS_DB.find(b => b.id === save.equippedBait) || BAITS_DB[0];
+  const baitTxt = bait.id !== 'none' ? ` + ${bait.icon}${save.baits[bait.id] || 0}` : '';
+  document.getElementById('hud-rod').textContent = `🎣 ${LANG === 'th' ? rod.nameTh : rod.nameEn}${baitTxt}`;
+
+  const hh = String(Math.floor(env.timeOfDay)).padStart(2, '0');
+  const mm = String(Math.floor((env.timeOfDay % 1) * 60)).padStart(2, '0');
+  const wIcon = env.weather === 'Rain' ? '🌧️' : env.weather === 'Storm' ? '⛈️' : env.weather === 'Fog' ? '🌫️' : '☀️';
+  document.getElementById('hud-weather').textContent = `${wIcon} ${hh}:${mm}`;
+}
+
+function toggleMinimalHUD() {
+  hudHidden = !hudHidden;
+  const tl = document.getElementById('hud-top-left');
+  const bc = document.getElementById('bottom-controls');
+  tl.style.display = hudHidden ? 'none' : 'flex';
+  bc.style.display = hudHidden ? 'none' : 'flex';
+}
+
+function showToast(msg) {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 3100);
+}
+
+function closeModal() {
+  document.getElementById('modal-backdrop').style.display = 'none';
+  currentModal = null;
+}
+
+function openModal(type, subTab = null) {
+  SFX.playClick();
+  currentModal = type;
+  const backdrop = document.getElementById('modal-backdrop');
+  const titleEl = document.getElementById('modal-title');
+  const bodyEl = document.getElementById('modal-body');
+  backdrop.style.display = 'flex';
+
+  if (type === 'bag') {
+    titleEl.textContent = LANG === 'th' ? `🎒 กระเป๋าปลา (${save.inventory.length} ตัว)` : `🎒 Fish Bag (${save.inventory.length})`;
+    const totalVal = save.inventory.reduce((s, item) => s + item.value, 0);
+    let html = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+        <span>${LANG === 'th' ? 'มูลค่ารวมในกระเป๋า:' : 'Total Bag Value:'} <b style="color:#4ade80;">${totalVal.toLocaleString()} 💰</b></span>
+        <button class="btn btn-gold btn-sm" onclick="sellAllFish()" ${save.inventory.length === 0 ? 'disabled' : ''}>💰 ${t('sellAll')} (+${totalVal.toLocaleString()})</button>
+      </div>
+    `;
+    if (save.inventory.length === 0) {
+      html += `<p style="color:#94a3b8; text-align:center; padding:24px;">${LANG === 'th' ? 'ยังไม่มีปลาในกระเป๋า ออกไปตกปลากันเลย!' : 'Your bag is empty. Go catch some fish!'}</p>`;
+    } else {
+      html += `<div class="grid-cards">`;
+      save.inventory.forEach((item, idx) => {
+        const f = FISH_DB.find(x => x.id === item.fishId);
+        html += `
+          <div class="item-card rarity-${f.rarity}">
+            <div style="font-size:11px; font-weight:700;">${f.rarity} ${item.mutation !== 'Normal' ? '• ' + item.mutation : ''}</div>
+            <canvas data-fish-id="${f.id}" width="64" height="44" style="width:76px; height:52px;"></canvas>
+            <div style="font-weight:700; font-size:13px; color:#fff;">${LANG === 'th' ? f.nameTh : f.nameEn}</div>
+            <div style="font-size:11px; color:#cbd5e1;">⚖️ ${item.kg} KG</div>
+            <button class="btn btn-green btn-sm" style="width:100%;" onclick="sellSingleFish(${idx})">💰 ${item.value}</button>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
+    bodyEl.innerHTML = html;
+    renderModalFishCanvases();
+
+  } else if (type === 'bestiary') {
+    const caughtCount = Object.keys(save.bestiary).length;
+    titleEl.textContent = LANG === 'th'
+      ? `📖 สมุดสะสมปลา (${caughtCount}/${FISH_DB.length} ชนิด)`
+      : `📖 Fish Bestiary (${caughtCount}/${FISH_DB.length} Discovered)`;
+
+    const filterBiome = subTab || 'all';
+    let html = `<div class="tab-bar">
+      <button class="tab-btn ${filterBiome==='all'?'active':''}" onclick="openModal('bestiary','all')">ALL (${FISH_DB.length})</button>
+      ${BIOMES.map(b => `<button class="tab-btn ${filterBiome===b.id?'active':''}" onclick="openModal('bestiary','${b.id}')">${b.icon} ${LANG==='th'?b.nameTh:b.nameEn}</button>`).join('')}
+    </div><div class="grid-cards">`;
+
+    FISH_DB.filter(f => filterBiome === 'all' || f.biome === filterBiome).forEach(f => {
+      const rec = save.bestiary[f.id];
+      const unlocked = !!rec;
+      const bObj = BIOMES.find(b => b.id === f.biome);
+      html += `
+        <div class="item-card ${unlocked ? 'rarity-' + f.rarity : ''}" style="opacity:${unlocked ? 1 : 0.72};">
+          <div style="font-size:10px; font-weight:700;">#${f.num} • ${f.rarity}</div>
+          <canvas data-fish-id="${f.id}" data-sil="${unlocked ? '0' : '1'}" width="64" height="44" style="width:76px; height:52px;"></canvas>
+          <div style="font-weight:700; font-size:12px; color:${unlocked ? '#fff' : '#64748b'};">
+            ${unlocked ? (LANG === 'th' ? f.nameTh : f.nameEn) : '???'}
+          </div>
+          <div style="font-size:10px; color:#94a3b8;">${bObj.icon} ${LANG==='th'?bObj.nameTh:bObj.nameEn}</div>
+          <div style="font-size:10px; color:#94a3b8;">🕒 ${f.timePref} • 🌦️ ${f.weatherPref}</div>
+          ${unlocked
+            ? `<div style="font-size:10px; color:#4ade80;">จับได้: ${rec.count} | สถิติ: ${rec.maxKg} KG</div>`
+            : `<div style="font-size:10px; color:#64748b;">ยังไม่เคยจับ</div>`}
+        </div>
+      `;
+    });
+    html += `</div>`;
+    bodyEl.innerHTML = html;
+    renderModalFishCanvases();
+
+  } else if (type === 'shop') {
+    const tab = subTab || 'rods';
+    titleEl.textContent = LANG === 'th' ? `🏪 ร้านค้าเมืองท่า (เงิน: ${save.coins.toLocaleString()} 💰)` : `🏪 Harbor Shops (Coins: ${save.coins.toLocaleString()} 💰)`;
+    let html = `<div class="tab-bar">
+      <button class="tab-btn ${tab==='rods'?'active':''}" onclick="openModal('shop','rods')">🎣 ${LANG==='th'?'คันเบ็ด (Rods)':'Fishing Rods'}</button>
+      <button class="tab-btn ${tab==='baits'?'active':''}" onclick="openModal('shop','baits')">🪱 ${LANG==='th'?'เหยื่อ (Baits)':'Baits'}</button>
+      <button class="tab-btn ${tab==='boats'?'active':''}" onclick="openModal('shop','boats')">🚤 ${LANG==='th'?'เรือ (Boats)':'Boats'}</button>
+      <button class="tab-btn ${tab==='sell'?'active':''}" onclick="openModal('shop','sell')">💰 ${LANG==='th'?'ขายปลา':'Sell Fish'}</button>
+    </div>`;
+
+    if (tab === 'rods') {
+      html += `<div class="grid-cards">`;
+      RODS_DB.forEach(r => {
+        const owned = save.ownedRods.includes(r.id);
+        const eq = save.equippedRod === r.id;
+        const lvOk = save.level >= r.reqLv;
+        html += `
+          <div class="item-card" style="border-color:${r.color};">
+            <div style="font-weight:700; color:${r.color}; font-size:14px;">🎣 ${LANG==='th'?r.nameTh:r.nameEn}</div>
+            <div style="font-size:11px; color:#cbd5e1; text-align:left; width:100%;">
+              🍀 Luck: +${r.luck}%<br>
+              🎯 Control: ${Math.round(r.control*100)}%<br>
+              💪 Max KG: ${r.strength} KG<br>
+              ⚡ Speed: x${r.speed}
+            </div>
+            ${eq
+              ? `<button class="btn btn-green btn-sm" disabled>${t('equipped')}</button>`
+              : owned
+                ? `<button class="btn btn-sm" onclick="equipRod('${r.id}')">${t('equip')}</button>`
+                : !lvOk
+                  ? `<button class="btn btn-sm" disabled>${t('locked')}${r.reqLv}</button>`
+                  : `<button class="btn btn-gold btn-sm" onclick="buyRod('${r.id}')">${t('buy')} ${r.price.toLocaleString()} 💰</button>`}
+          </div>
+        `;
+      });
+      html += `</div>`;
+    } else if (tab === 'baits') {
+      html += `<div class="grid-cards">`;
+      BAITS_DB.forEach(b => {
+        const count = save.baits[b.id] || 0;
+        const eq = save.equippedBait === b.id;
+        html += `
+          <div class="item-card">
+            <div style="font-size:24px;">${b.icon}</div>
+            <div style="font-weight:700; font-size:13px;">${LANG==='th'?b.nameTh:b.nameEn}</div>
+            <div style="font-size:11px; color:#94a3b8;">🍀 +${b.luck}% | ⚡ +${Math.round(b.speed*100)}%</div>
+            <div style="font-size:11px; color:#38bdf8;">${b.id==='none' ? '-' : (LANG==='th'?'คงเหลือ: ':'Owned: ') + count}</div>
+            <div style="display:flex; gap:5px; width:100%; justify-content:center;">
+              ${b.price > 0 ? `<button class="btn btn-gold btn-sm" onclick="buyBait('${b.id}')">+5 (${b.price}💰)</button>` : ''}
+              <button class="btn ${eq?'btn-green':''} btn-sm" onclick="equipBait('${b.id}')" ${b.id!=='none' && count<=0 ? 'disabled' : ''}>${eq ? '✓' : t('equip')}</button>
+            </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    } else if (tab === 'boats') {
+      html += `<div class="grid-cards">`;
+      BOATS_DB.forEach(b => {
+        const owned = save.ownedBoats.includes(b.id);
+        const eq = save.equippedBoat === b.id;
+        html += `
+          <div class="item-card">
+            <div style="font-size:26px;">🚤</div>
+            <div style="font-weight:700; font-size:14px;">${LANG==='th'?b.nameTh:b.nameEn}</div>
+            <div style="font-size:12px; color:#38bdf8;">⚡ Speed: ${b.speed} knots</div>
+            ${eq
+              ? `<button class="btn btn-green btn-sm" disabled>${t('equipped')}</button>`
+              : owned
+                ? `<button class="btn btn-sm" onclick="equipBoat('${b.id}')">${t('equip')}</button>`
+                : `<button class="btn btn-gold btn-sm" onclick="buyBoat('${b.id}')">${t('buy')} ${b.price.toLocaleString()} 💰</button>`}
+          </div>
+        `;
+      });
+      html += `</div>`;
+    } else if (tab === 'sell') {
+      openModal('bag');
+      return;
+    }
+    bodyEl.innerHTML = html;
+
+  } else if (type === 'quests') {
+    titleEl.textContent = LANG === 'th' ? '📜 บันทึกภารกิจ & Daily Quests' : '📜 Quest Log & Daily Quests';
+    let html = `<div style="display:flex; flex-direction:column; gap:10px;">`;
+    save.quests.forEach(q => {
+      const pct = Math.min(100, Math.round((q.progress / q.target) * 100));
+      html += `
+        <div style="background:rgba(15,23,42,0.85); border:1.5px solid ${q.done ? '#10b981' : '#3b82f6'}; border-radius:10px; padding:12px;">
+          <div style="display:flex; justify-content:space-between; font-weight:700; font-size:14px;">
+            <span>${LANG==='th' ? q.titleTh : q.titleEn}</span>
+            <span style="color:${q.done ? '#4ade80' : '#fbbf24'};">${q.done ? '✅ สำเร็จ' : `${q.progress}/${q.target}`}</span>
+          </div>
+          <div style="font-size:12px; color:#94a3b8; margin:4px 0;">รางวัล: +${q.rewardCoins} 💰 • +${q.rewardExp} EXP</div>
+          <div class="exp-bar-wrap"><div class="exp-bar-fill" style="width:${pct}%;"></div></div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+    bodyEl.innerHTML = html;
+
+  } else if (type === 'map') {
+    titleEl.textContent = LANG === 'th' ? '🗺️ แผนที่โลก PIXEL FISCH WORLD' : '🗺️ World Map';
+    let html = `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+        <canvas id="world-map-canvas" width="360" height="360" style="width:min(340px, 82vw); height:min(340px, 82vw); border:2px solid #4cc9f0; border-radius:10px;"></canvas>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; font-size:12px;">
+          ${BIOMES.map(b => `<span style="background:rgba(15,23,42,0.8); padding:4px 8px; border-radius:6px; border:1px solid #334155;">${b.icon} ${LANG==='th'?b.nameTh:b.nameEn}</span>`).join('')}
+        </div>
+      </div>
+    `;
+    bodyEl.innerHTML = html;
+    drawWorldMinimap();
+
+  } else if (type === 'customize') {
+    titleEl.textContent = LANG === 'th' ? '👕 ปรับแต่งตัวละคร' : '👕 Character Customization';
+    bodyEl.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:12px; max-width:360px; margin:0 auto;">
+        <label>ชื่อตัวละคร (Player Name):<br><input type="text" id="inp-char-name" value="${save.name}" maxlength="16" style="width:100%; margin-top:4px;"></label>
+        <div>สีผิว (Skin Tone):
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            ${['#fde68a', '#fcd34d', '#d97706', '#92400e', '#fef2f2'].map(c => `<button onclick="setAppearance('skin','${c}')" style="width:32px;height:32px;border-radius:8px;background:${c};border:2px solid #fff;cursor:pointer;"></button>`).join('')}
+          </div>
+        </div>
+        <div>สีเสื้อ (Outfit Color):
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            ${['#3b82f6', '#ef4444', '#10b981', '#a855f7', '#f59e0b', '#1e293b'].map(c => `<button onclick="setAppearance('shirt','${c}')" style="width:32px;height:32px;border-radius:8px;background:${c};border:2px solid #fff;cursor:pointer;"></button>`).join('')}
+          </div>
+        </div>
+        <div>หมวก (Hat Style):
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <button class="btn btn-sm" onclick="setAppearance('hat','cap')">🧢 Cap</button>
+            <button class="btn btn-sm" onclick="setAppearance('hat','straw')">👒 Straw Hat</button>
+            <button class="btn btn-sm" onclick="setAppearance('hat','crown')">👑 Crown</button>
+            <button class="btn btn-sm" onclick="setAppearance('hat','none')">❌ None</button>
+          </div>
+        </div>
+        <button class="btn btn-green" onclick="saveCharName()">💾 บันทึกตัวละคร</button>
+      </div>
+    `;
+
+  } else if (type === 'multiplayer') {
+    titleEl.textContent = LANG === 'th' ? '🌐 ระบบ Multiplayer เล่นกับเพื่อน (WebSocket)' : '🌐 Real-Time Multiplayer';
+    const isConn = mpSocket && mpSocket.readyState === WebSocket.OPEN;
+    bodyEl.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="padding:10px; border-radius:8px; background:rgba(15,23,42,0.9); border:1px solid ${isConn ? '#10b981' : '#f59e0b'}; font-size:13px;">
+          สถานะการเชื่อมต่อ: <b style="color:${isConn ? '#4ade80' : '#fbbf24'};">${isConn ? '🟢 เชื่อมต่อเซิร์ฟเวอร์แล้ว (Online)' : '🟡 โหมดเล่นคนเดียว (Offline / ยังไม่ได้เชื่อมต่อเซิร์ฟเวอร์)'}</b>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="mp-ws-url" value="${mpServerUrl}" placeholder="ws://localhost:8080" style="flex:1; min-width:180px;">
+          <input type="text" id="mp-room-code" value="${mpRoomCode}" placeholder="Room Code (เช่น PHEEM1)" style="width:140px;">
+          <button class="btn btn-green btn-sm" onclick="connectMultiplayer()">🔌 เชื่อมต่อ / สร้างห้อง</button>
+        </div>
+        <div style="background:#0f172a; border:1px solid #334155; border-radius:8px; padding:8px; height:120px; overflow-y:auto; font-size:12px;" id="mp-chat-box">
+          ${mpChatLog.map(m => `<div>${m}</div>`).join('') || '<span style="color:#64748b;">ยังไม่มีข้อความแชตในห้อง...</span>'}
+        </div>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="mp-chat-input" placeholder="พิมพ์ข้อความคุยกับเพื่อน..." style="flex:1;" onkeydown="if(event.key==='Enter') sendMPChat()">
+          <button class="btn btn-sm" onclick="sendMPChat()">ส่ง</button>
+        </div>
+        <details style="background:rgba(15,23,42,0.8); padding:10px; border-radius:8px; border:1px solid #475569; font-size:12px;">
+          <summary style="cursor:pointer; font-weight:700; color:#38bdf8;">📘 คู่มือเปิดเซิร์ฟเวอร์ Multiplayer จริง (Node.js server.js)</summary>
+          <p style="margin:8px 0; color:#cbd5e1;">1. ติดตั้ง Node.js และรัน <code>npm init -y && npm install ws</code><br>2. สร้างไฟล์ <code>server.js</code> ด้วยโค้ดด้านล่าง แล้วรัน <code>node server.js</code></p>
+          <textarea readonly style="width:100%; height:130px; background:#020617; color:#4ade80; font-family:monospace; font-size:11px; padding:8px; border-radius:6px;">const WebSocket = require('ws');
+const wss = new WebSocket.Server({ port: 8080 });
+const rooms = {};
+wss.on('connection', ws => {
+  ws.on('message', raw => {
+    const data = JSON.parse(raw);
+    if (data.type === 'join') {
+      ws.room = data.room || 'PUBLIC';
+      ws.pid = data.id;
+      rooms[ws.room] = rooms[ws.room] || new Set();
+      rooms[ws.room].add(ws);
+    }
+    if (ws.room && rooms[ws.room]) {
+      rooms[ws.room].forEach(c => { if (c !== ws && c.readyState === 1) c.send(JSON.stringify(data)); });
+    }
+  });
+  ws.on('close', () => { if (ws.room && rooms[ws.room]) rooms[ws.room].delete(ws); });
+});
+console.log('PIXEL FISCH WORLD WS Server running on ws://localhost:8080');</textarea>
+        </details>
+      </div>
+    `;
+
+  } else if (type === 'settings') {
+    titleEl.textContent = LANG === 'th' ? '⚙️ ตั้งค่าระบบเกม' : '⚙️ Game Settings';
+    bodyEl.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:14px; max-width:400px; margin:0 auto; font-size:14px;">
+        <label>🔊 เสียงเอฟเฟกต์ (SFX Volume): <input type="range" min="0" max="1" step="0.1" value="${SFX.sfxVol}" oninput="SFX.sfxVol=parseFloat(this.value)"></label>
+        <label>🎵 เสียงดนตรี (Music Volume): <input type="range" min="0" max="1" step="0.05" value="${SFX.musicVol}" oninput="SFX.musicVol=parseFloat(this.value)"></label>
+        <label>🖥️ ความละเอียดกราฟิก (Resolution):
+          <select onchange="setGraphicsScale(parseFloat(this.value))" style="margin-left:8px;">
+            <option value="1" ${graphicsScale===1?'selected':''}>High (100%)</option>
+            <option value="0.75" ${graphicsScale===0.75?'selected':''}>Medium (75%)</option>
+            <option value="0.5" ${graphicsScale===0.5?'selected':''}>Retro Pixel (50%)</option>
+          </select>
+        </label>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-sm" onclick="toggleLanguage()">🌐 เปลี่ยนภาษา (TH/EN)</button>
+          <button class="btn btn-sm" onclick="toggleFullscreen()">⛶ เต็มจอ (Fullscreen)</button>
+          <button class="btn btn-green btn-sm" onclick="writeSave(true)">💾 บันทึกเกมทันที</button>
+        </div>
+        <hr style="border-color:#334155;">
+        <button class="btn btn-red btn-sm" onclick="resetSaveData()">🗑️ ล้างข้อมูลเซฟทั้งหมด (Reset Save)</button>
+      </div>
+    `;
+
+  } else if (type === 'credits') {
+    titleEl.textContent = '⭐ CREDITS';
+    bodyEl.innerHTML = `
+      <div style="text-align:center; padding:20px 10px; display:flex; flex-direction:column; gap:12px;">
+        <div style="font-size:28px; font-weight:700; color:#ffd166; text-shadow:0 0 15px rgba(76,201,240,0.6);">พัฒนาโดย:ภีม</div>
+        <div style="font-size:14px; color:#cbd5e1;">PIXEL FISCH WORLD — 2D Top-Down Open World Fishing RPG</div>
+        <div style="font-size:12px; color:#94a3b8;">
+          • 56 Unique Pixel Art Fish Species across 7 Biomes<br>
+          • Fisch-inspired Tension Catch Bar Minigame<br>
+          • 7 Fishing Rods, 6 Baits, 4 Drivable Boats & Real-Time WebSocket Multiplayer
+        </div>
+      </div>
+    `;
+  }
+}
+
+function renderModalFishCanvases() {
+  document.querySelectorAll('canvas[data-fish-id]').forEach(c => {
+    const f = FISH_DB.find(x => x.id === c.getAttribute('data-fish-id'));
+    const sil = c.getAttribute('data-sil') === '1';
+    if (f) {
+      const cctx = c.getContext('2d');
+      cctx.clearRect(0, 0, c.width, c.height);
+      drawFishPixelArt(cctx, f, 32, 22, 1.25, sil);
+    }
+  });
+}
+
+function drawWorldMinimap() {
+  const mc = document.getElementById('world-map-canvas');
+  if (!mc) return;
+  const mctx = mc.getContext('2d');
+  const s = mc.width / WORLD_SIZE;
+
+  mctx.fillStyle = '#0369a1';
+  mctx.fillRect(0, 0, mc.width, mc.height);
+
+  BIOMES.forEach(b => {
+    mctx.fillStyle = b.isWaterZone ? 'rgba(8, 47, 73, 0.55)' : b.color;
+    mctx.beginPath();
+    mctx.arc(b.cx * s, b.cy * s, b.r * s, 0, Math.PI * 2);
+    mctx.fill();
+  });
+
+  // Player Dot
+  mctx.fillStyle = '#ef4444';
+  mctx.beginPath();
+  mctx.arc(player.x * s, player.y * s, 5, 0, Math.PI * 2);
+  mctx.fill();
+  mctx.strokeStyle = '#ffffff';
+  mctx.lineWidth = 1.5;
+  mctx.stroke();
+}
+
+// Shop & Bag Actions
+function sellSingleFish(idx) {
+  const item = save.inventory[idx];
+  if (!item) return;
+  save.coins += item.value;
+  save.stats.totalEarned += item.value;
+  save.inventory.splice(idx, 1);
+  SFX.playCoin();
+  writeSave(false);
+  updateHUD();
+  openModal('bag');
+}
+
+function sellAllFish() {
+  if (save.inventory.length === 0) return;
+  const total = save.inventory.reduce((s, item) => s + item.value, 0);
+  save.coins += total;
+  save.stats.totalEarned += total;
+  save.inventory = [];
+  SFX.playCoin();
+  writeSave(false);
+  updateHUD();
+  showToast(LANG === 'th' ? `ขายปลาทั้งหมดได้เงิน +${total.toLocaleString()} 💰` : `Sold all fish for +${total.toLocaleString()} 💰`);
+  openModal('bag');
+}
+
+function buyRod(id) {
+  const r = RODS_DB.find(x => x.id === id);
+  if (!r || save.coins < r.price || save.ownedRods.includes(id)) return;
+  save.coins -= r.price;
+  save.ownedRods.push(id);
+  save.equippedRod = id;
+  SFX.playCoin();
+  writeSave(false);
+  updateHUD();
+  openModal('shop', 'rods');
+}
+
+function equipRod(id) {
+  save.equippedRod = id;
+  SFX.playClick();
+  writeSave(false);
+  updateHUD();
+  openModal('shop', 'rods');
+}
+
+function buyBait(id) {
+  const b = BAITS_DB.find(x => x.id === id);
+  if (!b || save.coins < b.price) return;
+  save.coins -= b.price;
+  save.baits[id] = (save.baits[id] || 0) + 5;
+  save.equippedBait = id;
+  SFX.playCoin();
+  writeSave(false);
+  updateHUD();
+  openModal('shop', 'baits');
+}
+
+function equipBait(id) {
+  save.equippedBait = id;
+  SFX.playClick();
+  writeSave(false);
+  updateHUD();
+  openModal('shop', 'baits');
+}
+
+function buyBoat(id) {
+  const b = BOATS_DB.find(x => x.id === id);
+  if (!b || save.coins < b.price || save.ownedBoats.includes(id)) return;
+  save.coins -= b.price;
+  save.ownedBoats.push(id);
+  save.equippedBoat = id;
+  SFX.playCoin();
+  writeSave(false);
+  updateHUD();
+  showToast(LANG === 'th' ? 'ซื้อเรือสำเร็จ! เดินไปที่ท่าเรือแล้วกด [E] เพื่อขึ้นเรือ' : 'Boat purchased! Walk to dock and press [E] to board.');
+  openModal('shop', 'boats');
+}
+
+function equipBoat(id) {
+  save.equippedBoat = id;
+  SFX.playClick();
+  writeSave(false);
+  openModal('shop', 'boats');
+}
+
+function setAppearance(key, val) {
+  save.appearance[key] = val;
+  SFX.playClick();
+  writeSave(false);
+}
+
+function saveCharName() {
+  const val = document.getElementById('inp-char-name').value.trim();
+  if (val) save.name = val;
+  writeSave(true);
+  closeModal();
+}
+
+function resetSaveData() {
+  localStorage.removeItem('PIXEL_FISCH_WORLD_SAVE_V1');
+  save = JSON.parse(JSON.stringify(DEFAULT_SAVE));
+  updateHUD();
+  closeModal();
+  showToast('Reset Save Complete');
+}
+
+// -------------------- 14. REAL WEBSOCKET MULTIPLAYER CLIENT --------------------
+let mpSocket = null;
+let mpServerUrl = 'ws://localhost:8080';
+let mpRoomCode = 'PHEEM1';
+let mpPlayers = {};
+let mpChatLog = [];
+const myMpId = 'p_' + Math.random().toString(36).slice(2, 8);
+
+function connectMultiplayer() {
+  const urlInp = document.getElementById('mp-ws-url').value.trim();
+  const roomInp = document.getElementById('mp-room-code').value.trim().toUpperCase() || 'PUBLIC';
+  mpServerUrl = urlInp;
+  mpRoomCode = roomInp;
+
+  if (mpSocket) mpSocket.close();
+
+  try {
+    mpSocket = new WebSocket(mpServerUrl);
+    mpSocket.onopen = () => {
+      sendMP({ type: 'join', room: mpRoomCode, id: myMpId, name: save.name });
+      mpChatLog.push(`<span style="color:#4ade80;">[System] เชื่อมต่อห้อง ${mpRoomCode} สำเร็จ!</span>`);
+      if (currentModal === 'multiplayer') openModal('multiplayer');
+    };
+    mpSocket.onmessage = (ev) => {
+      try {
+        const msg = JSON.parse(ev.data);
+        if (msg.id === myMpId) return;
+        if (msg.type === 'move') {
+          mpPlayers[msg.id] = { x: msg.x, y: msg.y, dir: msg.dir, walk: msg.walk, name: msg.name, shirt: msg.shirt };
+        } else if (msg.type === 'chat') {
+          mpChatLog.push(`<b>${msg.name}:</b> ${msg.text}`);
+          if (currentModal === 'multiplayer') openModal('multiplayer');
+        } else if (msg.type === 'catch') {
+          showToast(`🌐 ${msg.name} จับได้ ${msg.fishName} (${msg.kg} KG)!`);
+        }
+      } catch (e) {}
+    };
+    mpSocket.onerror = () => {
+      showToast(LANG === 'th' ? '❌ ไม่พบเซิร์ฟเวอร์ WebSocket (ดูคู่มือการเปิดเซิร์ฟเวอร์ในหน้าต่างนี้)' : '❌ WebSocket Server unreachable');
+    };
+    mpSocket.onclose = () => {
+      mpPlayers = {};
+      if (currentModal === 'multiplayer') openModal('multiplayer');
+    };
+  } catch (e) {
+    showToast('Invalid WebSocket URL');
+  }
+}
+
+function sendMP(payload) {
+  if (mpSocket && mpSocket.readyState === WebSocket.OPEN) {
+    mpSocket.send(JSON.stringify({ ...payload, id: myMpId, room: mpRoomCode, name: save.name }));
+  }
+}
+
+function sendMPChat() {
+  const inp = document.getElementById('mp-chat-input');
+  if (!inp || !inp.value.trim()) return;
+  const text = inp.value.trim();
+  inp.value = '';
+  mpChatLog.push(`<b>${save.name}:</b> ${text}`);
+  sendMP({ type: 'chat', text });
+  if (currentModal === 'multiplayer') openModal('multiplayer');
+}
+
+// -------------------- 15. INPUT LISTENERS & RESIZE --------------------
+function resizeCanvas() {
+  canvas.width = Math.floor(window.innerWidth * graphicsScale);
+  canvas.height = Math.floor(window.innerHeight * graphicsScale);
+}
+function setGraphicsScale(s) {
+  graphicsScale = s;
+  resizeCanvas();
+}
+window.addEventListener('resize', resizeCanvas);
+
+window.addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (e.code === 'Space') {
+    if (fishing.state === 'MINIGAME') {
+      fishing.holding = true;
+    } else if (!e.repeat) {
+      triggerCastOrAction();
+    }
+  }
+  if (!e.repeat && gameState === 'PLAYING') {
+    if (e.code === 'KeyE') handleInteract();
+    if (e.code === 'KeyB') currentModal === 'bag' ? closeModal() : openModal('bag');
+    if (e.code === 'KeyM') currentModal === 'map' ? closeModal() : openModal('map');
+    if (e.code === 'Escape' && currentModal) closeModal();
+  }
+});
+
+window.addEventListener('keyup', e => {
+  keys[e.code] = false;
+  if (e.code === 'Space') fishing.holding = false;
+});
+
+// Cast / Minigame Hold Button (Mouse & Touch)
+const castBtn = document.getElementById('btn-action-cast');
+const onHoldStart = (e) => {
+  e.preventDefault();
+  if (fishing.state === 'MINIGAME') fishing.holding = true;
+  else triggerCastOrAction();
+};
+const onHoldEnd = (e) => {
+  e.preventDefault();
+  fishing.holding = false;
+};
+castBtn.addEventListener('mousedown', onHoldStart);
+castBtn.addEventListener('touchstart', onHoldStart, { passive: false });
+window.addEventListener('mouseup', onHoldEnd);
+window.addEventListener('touchend', onHoldEnd);
+
+// Also allow holding directly on the minigame box
+const mgBox = document.getElementById('fishing-minigame');
+mgBox.addEventListener('mousedown', onHoldStart);
+mgBox.addEventListener('touchstart', onHoldStart, { passive: false });
+
+// Virtual Joystick Touch/Mouse
+const joyZone = document.getElementById('joystick-zone');
+const joyKnob = document.getElementById('joystick-knob');
+
+function updateJoystick(clientX, clientY) {
+  const rect = joyZone.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const maxR = rect.width / 2 - 18;
+  let dx = clientX - cx;
+  let dy = clientY - cy;
+  const dist = Math.hypot(dx, dy);
+  if (dist > maxR) {
+    dx = (dx / dist) * maxR;
+    dy = (dy / dist) * maxR;
+  }
+  joyKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+  joy.dx = dx / maxR;
+  joy.dy = dy / maxR;
+}
+
+joyZone.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const touch = e.changedTouches[0];
+  joy.active = true;
+  joy.id = touch.identifier;
+  updateJoystick(touch.clientX, touch.clientY);
+}, { passive: false });
+
+joyZone.addEventListener('touchmove', e => {
+  e.preventDefault();
+  for (const touch of e.changedTouches) {
+    if (touch.identifier === joy.id) {
+      updateJoystick(touch.clientX, touch.clientY);
+    }
+  }
+}, { passive: false });
+
+joyZone.addEventListener('touchend', e => {
+  for (const touch of e.changedTouches) {
+    if (touch.identifier === joy.id) {
+      joy.active = false;
+      joy.dx = 0;
+      joy.dy = 0;
+      joyKnob.style.transform = 'translate(0px, 0px)';
+    }
+  }
+});
+
+// -------------------- 16. MAIN GAME LOOP --------------------
+let lastTime = 0;
+let hudSyncTimer = 0;
+let mpSyncTimer = 0;
+let autoSaveTimer = 0;
+
+function gameLoop(timestamp) {
+  const dt = Math.min(0.05, (timestamp - lastTime) / 1000 || 0.016);
+  lastTime = timestamp;
+  globalTime += dt;
+
+  if (gameState === 'MENU' || gameState === 'INTRO') {
+    // Gentle scenic camera pan in background on Menu
+    camera.x = 1600 + Math.cos(globalTime * 0.25) * 180;
+    camera.y = 1750 + Math.sin(globalTime * 0.2) * 140;
+    renderWorld();
+  } else if (gameState === 'PLAYING') {
+    updateEnvironment(dt);
+    updatePlayer(dt);
+    updateFishing(dt);
+    renderWorld();
+
+    hudSyncTimer += dt;
+    if (hudSyncTimer >= 0.25) {
+      hudSyncTimer = 0;
+      updateHUD();
+    }
+
+    mpSyncTimer += dt;
+    if (mpSyncTimer >= 0.12) {
+      mpSyncTimer = 0;
+      sendMP({ type: 'move', x: Math.round(player.x), y: Math.round(player.y), dir: player.dir, walk: player.walkFrame, shirt: save.appearance.shirt });
+    }
+
+    autoSaveTimer += dt;
+    if (autoSaveTimer >= 30) {
+      autoSaveTimer = 0;
+      writeSave(false);
+    }
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+window.onload = function() {
+  loadSave();
+  resizeCanvas();
+  updateStaticTexts();
+  requestAnimationFrame(gameLoop);
+};
+</script>
+</body>
+</html>
